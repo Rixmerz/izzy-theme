@@ -63,9 +63,9 @@ if [[ -f "$OMP_TEMPLATE" ]]; then
         -e "s|__SURFACE_CONTAINER_HIGH__|$(get_hex surface_container_high)|g" \
         -e "s|__SURFACE_CONTAINER_HIGHEST__|$(get_hex surface_container_highest)|g" \
         "$OMP_TEMPLATE" > "$OMP_OUTPUT"
-    # Invalida el cache de oh-my-posh (cada sesión bashea su propia cache y
-    # por default no relee el config). Siguiente PROMPT_COMMAND regenera.
-    command -v oh-my-posh >/dev/null && oh-my-posh cache clear >/dev/null 2>&1 || true
+    # El refresco de la shell actual lo hace la función wrapper `theme` del
+    # .bashrc (un proceso hijo no puede modificar el prompt de su padre).
+    # El binario solo regenera el JSON aquí.
 fi
 
 # 4) symlink estable que apunta al wallpaper activo
