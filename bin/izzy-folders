@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+# izzy-folders — mapea el color primary del tema matugen al color de
+# carpetas Papirus más cercano en tono, y crea un icon-theme user-level
+# (~/.local/share/icons/Papirus-Izzy) que hereda de Papirus-Dark con los
+# folder-*.svg apuntando al variant elegido.
+#
+# Uso:
+#   izzy-folders                  # auto-detectar desde waybar-colors.css
+#   izzy-folders <color>          # forzar color (blue, teal, pink, etc.)
+
+set -euo pipefail
+
+BASE_THEME="Papirus-Dark"
+CUSTOM_THEME="Papirus-Izzy"
+BASE_ICONS="/usr/share/icons/$BASE_THEME"
+CUSTOM_ICONS="$HOME/.local/share/icons/$CUSTOM_THEME"
+WCSS="$HOME/.config/theme/outputs/waybar-colors.css"
+
+pick_color_from_hex() {
+    local hex="$1"
+    python3 - "$hex" <<'PYEOF'
+import colorsys, sys
+hex = sys.argv[1].lstrip("#")
+r = int(hex[0:2], 16) / 255
+g = int(hex[2:4], 16) / 255
+b = int(hex[4:6], 16) / 255
+h, l, s = colorsys.rgb_to_hls(r, g, b)
+h *= 360
+if s < 0.15:
+    print("grey" if l < 0.5 else "white"); sys.exit(0)
+buckets = [
+    ( 15, "red"), ( 45, "orange"), ( 75, "yellow"),
+    (150, "green"), (195, "cyan"), (255, "blue"),
+    (285, "violet"), (345, "pink"), (360, "red"),
+]
+for max_h, name in buckets:
+    if h < max_h:
+        print(name); sys.exit(0)
+print("blue")
+PYEOF
+}
+
+COLOR="${1:-}"
+if [[ -z "$COLOR" ]]; then
+    [[ -f "$WCSS" ]] || { echo "error: $WCSS no existe. correé 'theme <imagen>' primero" >&2; exit 1; }
+    HEX=$(awk '$2=="primary" { gsub(";",""); print $3 }' "$WCSS" | head -1)
+    [[ -n "$HEX" ]] || { echo "error: no se pudo extraer primary de $WCSS" >&2; exit 1; }
+    COLOR=$(pick_color_from_hex "$HEX")
+fi
+
+[[ -d "$BASE_ICONS" ]] || { echo "error: $BASE_THEME no está instalado. sudo pacman -S papirus-icon-theme" >&2; exit 1; }
+
+# Crear theme user-level
+mkdir -p "$CUSTOM_ICONS"
+
+cat > "$CUSTOM_ICONS/index.theme" <<IEOF
+[Icon Theme]
+Name=$CUSTOM_THEME
+Comment=Papirus-Dark con carpetas del tema matugen activo
+Inherits=$BASE_THEME
+Directories=16x16/places,22x22/places,24x24/places,32x32/places,48x48/places,64x64/places,symbolic/places
+
+[16x16/places]
+Size=16
+Context=Places
+Type=Scalable
+[22x22/places]
+Size=22
+Context=Places
+Type=Scalable
+[24x24/places]
+Size=24
+Context=Places
+Type=Scalable
+[32x32/places]
+Size=32
+Context=Places
+Type=Scalable
+[48x48/places]
+Size=48
+Context=Places
+Type=Scalable
+[64x64/places]
+Size=64
+Context=Places
+Type=Scalable
+[symbolic/places]
+Size=16
+Context=Places
+Type=Scalable
+IEOF
+
+# Nombres de folder que queremos overridear al color elegido
+STANDARD_FOLDERS=(
+    "folder"
+    "folder-open"
+    "folder-visiting"
+    "folder-drag-accept"
+    "user-home"
+    "user-desktop"
+    "user-documents"
+    "user-downloads"
+    "user-images"
+    "user-music"
+    "user-videos"
+    "user-pictures"
+    "user-public"
+    "user-templates"
+    "user-trash"
+)
+
+for SIZE in 16x16 22x22 24x24 32x32 48x48 64x64; do
+    SRC="$BASE_ICONS/$SIZE/places"
+    DST="$CUSTOM_ICONS/$SIZE/places"
+    [[ -d "$SRC" ]] || continue
+    mkdir -p "$DST"
+    find "$DST" -maxdepth 1 -type l -delete 2>/dev/null || true
+
+    # folder genérico + estados
+    for STATE in "" "-open" "-visiting" "-drag-accept"; do
+        CANDIDATE="folder-${COLOR}${STATE}.svg"
+        if [[ -f "$SRC/$CANDIDATE" ]]; then
+            ln -sf "$SRC/$CANDIDATE" "$DST/folder${STATE}.svg"
+        fi
+    done
+
+    # user-* → folder-*
+    for UF in home desktop documents downloads images music videos pictures public templates trash; do
+        for STATE in "" "-open"; do
+            # prioridad: user-${UF}-color si existe (rara), sino folder-color-${UF}
+            for C in "folder-${COLOR}-${UF}${STATE}.svg" "user-${UF}${STATE}-${COLOR}.svg"; do
+                if [[ -f "$SRC/$C" ]]; then
+                    ln -sf "$SRC/$C" "$DST/user-${UF}${STATE}.svg"
+                    break
+                fi
+            done
+        done
+    done
+done
+
+# Refrescar cache (no bloqueante si falla)
+gtk-update-icon-cache -f "$CUSTOM_ICONS" 2>/dev/null || true
+
+echo "✓ izzy-folders: carpetas ajustadas a '$COLOR' (theme: $CUSTOM_THEME)"

@@ -1,0 +1,198 @@
+/* gtk.css — overrides GTK3 con paleta matugen (izzy-theme).
+   Reusamos waybar-colors.css (también GTK-CSS con @define-color).
+   Scope principal: Thunar. */
+
+@import url("file:///home/rixmerz/.config/theme/outputs/waybar-colors.css");
+
+/* ── Thunar — file manager ─────────────────────────────────── */
+window.thunar,
+.thunar,
+ThunarWindow {
+    background-color: @surface;
+    color: @on_surface;
+}
+
+ThunarWindow headerbar,
+.thunar headerbar,
+.thunar .titlebar {
+    background: alpha(@surface_container, 0.85);
+    color: @on_surface;
+    border-bottom: 1px solid alpha(@outline_variant, 0.35);
+    padding: 6px 8px;
+}
+
+ThunarWindow headerbar button {
+    background-color: transparent;
+    color: @on_surface;
+    border-radius: 8px;
+    padding: 4px 8px;
+}
+
+ThunarWindow headerbar button:hover {
+    background-color: alpha(@primary_container, 0.55);
+}
+
+/* Sidebar (tree de lugares) */
+ThunarWindow .sidebar,
+ThunarWindow treeview.sidebar,
+.thunar treeview {
+    background-color: alpha(@surface_container, 0.55);
+    color: @on_surface_variant;
+}
+
+ThunarWindow .sidebar:selected,
+.thunar treeview:selected {
+    background-color: alpha(@primary_container, 0.75);
+    color: @on_primary_container;
+    border-radius: 6px;
+}
+
+/* Área de contenido — scrolledwindow envuelve iconview/treeview */
+ThunarWindow scrolledwindow,
+ThunarWindow scrolledwindow > viewport,
+ThunarWindow .standard-view,
+.thunar scrolledwindow,
+.thunar scrolledwindow > viewport {
+    background-color: alpha(@surface_container_low, 0.35);
+}
+
+/* Vista principal (íconos/lista) */
+ThunarWindow iconview,
+ThunarWindow flowbox,
+ThunarWindow treeview,
+.thunar iconview,
+.thunar flowbox {
+    background-color: transparent;
+    color: @on_surface;
+}
+
+/* Breadcrumb path bar (debajo del header) */
+ThunarLocationBar,
+ThunarWindow .path-bar,
+ThunarWindow .location-bar {
+    background-color: alpha(@surface_container_high, 0.5);
+    padding: 4px 6px;
+    border-bottom: 1px solid alpha(@outline_variant, 0.25);
+}
+
+ThunarLocationBar button,
+ThunarWindow .path-bar button {
+    background-color: transparent;
+    border-radius: 6px;
+    padding: 2px 8px;
+    color: @on_surface_variant;
+}
+
+ThunarLocationBar button:hover,
+ThunarWindow .path-bar button:hover {
+    background-color: alpha(@primary_container, 0.45);
+    color: @on_primary_container;
+}
+
+ThunarLocationBar button:checked,
+ThunarWindow .path-bar button:checked {
+    background-color: @primary_container;
+    color: @on_primary_container;
+    font-weight: 600;
+}
+
+ThunarWindow iconview:selected,
+ThunarWindow flowbox:selected,
+ThunarWindow treeview:selected,
+.thunar iconview:selected,
+.thunar flowbox:selected {
+    background-color: alpha(@primary_container, 0.75);
+    color: @on_primary_container;
+    border-radius: 8px;
+}
+
+/* Address bar / path entry */
+ThunarWindow entry,
+.thunar entry {
+    background-color: alpha(@surface_container_highest, 0.70);
+    color: @on_surface;
+    border: 1px solid alpha(@outline_variant, 0.4);
+    border-radius: 8px;
+    padding: 4px 10px;
+}
+
+ThunarWindow entry:focus,
+.thunar entry:focus {
+    border-color: @primary;
+    background-color: alpha(@surface_container_highest, 0.85);
+}
+
+/* Botones generales */
+ThunarWindow button,
+.thunar button {
+    background-color: alpha(@surface_container_high, 0.50);
+    color: @on_surface;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 10px;
+    transition: background-color 180ms ease;
+}
+
+ThunarWindow button:hover,
+.thunar button:hover {
+    background-color: alpha(@primary_container, 0.60);
+    color: @on_primary_container;
+}
+
+ThunarWindow button:active,
+.thunar button:active {
+    background-color: @primary;
+    color: @on_primary;
+}
+
+/* Statusbar */
+ThunarWindow statusbar,
+.thunar statusbar {
+    background-color: alpha(@surface_container, 0.6);
+    color: @on_surface_variant;
+    border-top: 1px solid alpha(@outline_variant, 0.3);
+    padding: 2px 10px;
+}
+
+/* Scrollbars */
+ThunarWindow scrollbar,
+.thunar scrollbar {
+    background: transparent;
+    border: none;
+}
+
+ThunarWindow scrollbar slider,
+.thunar scrollbar slider {
+    background: alpha(@outline, 0.55);
+    border-radius: 6px;
+    min-width: 6px;
+    min-height: 6px;
+    border: 2px solid transparent;
+}
+
+ThunarWindow scrollbar slider:hover,
+.thunar scrollbar slider:hover {
+    background: @primary;
+}
+
+/* Menús contextuales */
+ThunarWindow menu,
+.thunar menu {
+    background-color: alpha(@surface_container_high, 0.95);
+    border: 1px solid alpha(@outline_variant, 0.5);
+    border-radius: 10px;
+    padding: 4px;
+}
+
+ThunarWindow menu menuitem,
+.thunar menu menuitem {
+    color: @on_surface;
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+
+ThunarWindow menu menuitem:hover,
+.thunar menu menuitem:hover {
+    background-color: @primary_container;
+    color: @on_primary_container;
+}

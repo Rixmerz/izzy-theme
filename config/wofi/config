@@ -1,0 +1,8 @@
+allow_images=true
+allow_markup=true
+insensitive=true
+hide_scroll=true
+no_actions=true
+prompt=Buscar
+location=center
+layer=overlay

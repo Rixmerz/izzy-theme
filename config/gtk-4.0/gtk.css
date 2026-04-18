@@ -1,0 +1,29 @@
+/* gtk.css — GTK4/libadwaita overrides con paleta matugen.
+   Para apps GTK4 futuras (nautilus, file-roller, etc.) */
+
+@import url("file:///home/rixmerz/.config/theme/outputs/waybar-colors.css");
+
+/* Accent global */
+@define-color accent_bg_color  @primary;
+@define-color accent_fg_color  @on_primary;
+@define-color accent_color     @primary;
+
+/* Window background más sutil cuando el compositor ya aplica opacity */
+window {
+    background-color: @surface;
+    color: @on_surface;
+}
+
+headerbar {
+    background-color: alpha(@surface_container, 0.85);
+    color: @on_surface;
+    border-bottom: 1px solid alpha(@outline_variant, 0.35);
+}
+
+button {
+    border-radius: 8px;
+}
+
+entry {
+    border-radius: 8px;
+}

@@ -1,8 +1,7 @@
-/* izzy-theme — waybar style.
-   Colores en waybar-colors.css (generado por matugen; symlink creado por install.sh).
-   Para cambiar tema: `theme <ruta-imagen>`. */
+/* waybar style — consume colores desde ~/.config/theme/outputs/waybar-colors.css.
+   Ese archivo es generado por matugen. Para cambiar tema: `theme <ruta-imagen>`. */
 
-@import url("waybar-colors.css");
+@import url("/home/rixmerz/.config/theme/outputs/waybar-colors.css");
 
 * {
     font-family: "JetBrainsMono Nerd Font", "Noto Sans", sans-serif;
@@ -21,14 +20,24 @@ window#waybar {
 }
 
 tooltip {
-    background: @surface;
-    border: 1px solid @outline;
-    border-radius: 8px;
+    background: alpha(@surface_container_highest, 0.98);
+    border: 1px solid alpha(@outline_variant, 0.5);
+    border-radius: 14px;
+    padding: 18px 22px;
     color: @on_surface;
 }
 
+tooltip label {
+    color: @on_surface;
+    margin: 0;
+    padding: 1px 0;
+}
+
 /* ── Workspaces ─────────────────────────────────────────────── */
-#workspaces { margin: 0 6px; padding: 0 4px; }
+#workspaces {
+    margin: 0 6px;
+    padding: 0 4px;
+}
 
 #workspaces button {
     color: @outline_variant;
@@ -74,30 +83,99 @@ window#waybar.empty #window { background: transparent; }
     font-weight: 600;
 }
 
-/* ── Right modules ──────────────────────────────────────────── */
-#cpu, #memory, #network, #pulseaudio, #battery, #tray {
+/* ── Right side: glyphs sueltos (acciones) ─────────────────── */
+#network, #bluetooth, #pulseaudio {
+    color: @on_surface;
+    background: transparent;
     padding: 0 10px;
-    margin: 4px 2px;
+    margin: 4px 3px;
     border-radius: 8px;
-    background: alpha(@surface_container_high, 0.6);
+    font-size: 17px;
+    transition: background-color 200ms ease, color 200ms ease;
 }
 
-#cpu        { color: @secondary; }
-#memory     { color: @tertiary; }
-#network    { color: @primary; }
-#pulseaudio { color: @tertiary; }
-#pulseaudio.muted { color: @outline_variant; }
+#network:hover,
+#bluetooth:hover,
+#pulseaudio:hover {
+    background: alpha(@primary, 0.25);
+    color: #ffffff;
+}
 
-#battery               { color: @tertiary; }
-#battery.charging      { color: @primary; }
+#network.disconnected,
+#bluetooth.disabled,
+#bluetooth.off,
+#pulseaudio.muted {
+    color: alpha(@on_surface, 0.55);
+}
+
+#bluetooth.connected { color: @tertiary; }
+
+/* ── Battery: única píldora con texto (info crítica) ───────── */
+#battery {
+    color: @on_surface;
+    background: alpha(@surface_container_high, 0.65);
+    padding: 0 12px;
+    margin: 4px 4px;
+    border-radius: 999px;
+    font-weight: 500;
+}
+
+#battery.charging { color: @primary; }
 #battery.warning:not(.charging)  { color: @secondary; }
 #battery.critical:not(.charging) {
     color: @error;
     animation: blink 1s linear infinite alternate;
 }
 
-@keyframes blink { to { background-color: @error; color: @on_error; } }
+@keyframes blink {
+    to { background-color: @error; color: @on_error; }
+}
 
-#tray { background: transparent; }
+#tray {
+    background: transparent;
+    padding: 0 6px;
+    margin: 4px 4px;
+}
+
 #tray > .passive         { -gtk-icon-effect: dim; }
 #tray > .needs-attention { -gtk-icon-effect: highlight; }
+
+/* ── Media player / YouTube Music launcher ─────────────────── */
+#custom-mediaplayer {
+    color: @on_surface_variant;
+    background: alpha(@surface_container_high, 0.55);
+    padding: 0 14px;
+    margin: 4px 6px;
+    border-radius: 999px;
+    font-weight: 500;
+    transition: background-color 260ms cubic-bezier(0.4, 0, 0.2, 1),
+                color            260ms cubic-bezier(0.4, 0, 0.2, 1),
+                padding          220ms cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow       260ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#custom-mediaplayer:hover {
+    padding: 0 20px;
+    box-shadow: 0 0 0 1px alpha(@tertiary, 0.55);
+}
+
+#custom-mediaplayer.idle {
+    color: @on_surface_variant;
+    background: alpha(@surface_container_high, 0.5);
+}
+
+#custom-mediaplayer.playing {
+    color: @on_tertiary_container;
+    background: @tertiary_container;
+    font-weight: 600;
+}
+
+#custom-mediaplayer.playing:hover {
+    box-shadow: 0 0 0 1px alpha(@tertiary, 0.9);
+}
+
+#custom-mediaplayer.paused {
+    color: @on_surface_variant;
+    background: alpha(@tertiary_container, 0.35);
+    font-style: italic;
+}

@@ -1,0 +1,67 @@
+/* Importa la paleta matugen usada por waybar para mantener coherencia. */
+@import url("file:///home/rixmerz/.config/theme/outputs/waybar-colors.css");
+
+* {
+  font-family: "JetBrainsMono Nerd Font", "JetBrainsMono NFP", "Symbols Nerd Font", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+window {
+  background-color: alpha(@surface_container, 0.92);
+  border: 2px solid alpha(@primary, 0.45);
+  border-radius: 14px;
+}
+
+#outer-box {
+  padding: 14px;
+  background: transparent;
+}
+
+#input {
+  background-color: alpha(@surface_container_high, 0.98);
+  color: #ffffff;
+  border: 1px solid alpha(@primary, 0.5);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  caret-color: @primary;
+}
+
+#input:focus {
+  border: 1px solid @primary;
+  box-shadow: none;
+  outline: none;
+}
+
+#inner-box,
+#scroll {
+  background: transparent;
+  border: none;
+}
+
+#text {
+  color: #f4f4f4;
+  padding: 0;
+  text-shadow: 0 0 0 transparent;
+}
+
+#entry {
+  background-color: transparent;
+  border-radius: 10px;
+  padding: 9px 12px;
+  margin: 2px 0;
+}
+
+#entry:selected {
+  background-color: alpha(@primary_container, 0.85);
+}
+
+#entry:selected #text {
+  color: #ffffff;
+}
+
+#entry image {
+  margin-right: 10px;
+  -gtk-icon-transform: scale(1.1);
+}
