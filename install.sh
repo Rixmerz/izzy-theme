@@ -76,10 +76,22 @@ Siguientes pasos:
 
   3) Prompt oh-my-posh (opcional, colores derivados del wallpaper):
        yay -S --needed oh-my-posh-bin
-       # luego agregá a tu ~/.bashrc (antes de cualquier asignación a PS1):
-       #   if command -v oh-my-posh >/dev/null && [[ -f ~/.config/theme/outputs/oh-my-posh.json ]]; then
-       #     eval "$(oh-my-posh init bash --config ~/.config/theme/outputs/oh-my-posh.json)"
+       # Agregá a tu ~/.bashrc:
+       #   _omp_config="$HOME/.config/theme/outputs/oh-my-posh.json"
+       #   if command -v oh-my-posh >/dev/null && [[ -f "$_omp_config" ]]; then
+       #       eval "$(oh-my-posh init bash --config "$_omp_config")"
+       #       theme() {
+       #           command theme "$@" || return $?
+       #           [[ -f "$_omp_config" ]] || return 0
+       #           PROMPT_COMMAND="${PROMPT_COMMAND//_omp_hook;/}"
+       #           PROMPT_COMMAND="${PROMPT_COMMAND//_omp_hook/}"
+       #           unset -f _omp_hook 2>/dev/null
+       #           oh-my-posh cache clear >/dev/null 2>&1
+       #           eval "$(oh-my-posh init bash --config "$_omp_config")"
+       #       }
        #   fi
+       # (la función `theme` wrapper refresca el prompt de la shell actual
+       #  al cambiar tema; sin ella, solo terminales nuevas ven los cambios.)
 
   4) Iniciá/Reiniciá Hyprland (Super+Shift+M) y aplicá un tema:
        theme ~/Pictures/Wallpapers/<imagen>
