@@ -28,3 +28,7 @@ output_path = "~/.config/theme/outputs/hyprlock-colors.conf"
 input_path  = "~/.config/matugen/templates/mako.conf"
 output_path = "~/.config/mako/config"
 post_hook   = "makoctl reload || true"
+
+# oh-my-posh NO va por matugen: upon choca con las expresiones nativas {{ }}
+# de los themes oh-my-posh. La sustitución la hace el script `theme` con sed
+# leyendo los hex del waybar-colors.css generado. Ver bin/theme.

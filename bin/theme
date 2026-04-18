@@ -34,14 +34,38 @@ PREFER="${THEME_PREFER:-saturation}"       # cuando matugen encuentra varios
                                            # saturation | less-saturation |
                                            # value | closest-to-fallback
 
-# 1) copiar imagen al almacén canónico (idempotente)
+# 1) copiar imagen al almacén canónico (idempotente).
+# Si IMG ya vive dentro de WALLDIR no se copia (sería el mismo archivo).
 DEST="$WALLDIR/$(basename "$IMG")"
-cp -u "$IMG" "$DEST"
+if [[ "$IMG" != "$DEST" ]]; then
+    cp -u "$IMG" "$DEST"
+fi
 
 # 2) matugen: genera outputs + lanza post_hooks (waybar/mako reload)
 matugen image -t "$SCHEME" --prefer "$PREFER" --mode dark "$DEST"
 
-# 3) symlink estable que apunta al wallpaper activo
+# 3) renderizar tema oh-my-posh (si el template existe) extrayendo hex del
+#    waybar-colors.css que matugen acaba de generar. Esto desacopla oh-my-posh
+#    del engine de matugen (que choca con las expresiones {{ }} de oh-my-posh).
+OMP_TEMPLATE="$THEMEDIR/atomic.omp.template.json"
+OMP_OUTPUT="$THEMEDIR/outputs/oh-my-posh.json"
+if [[ -f "$OMP_TEMPLATE" ]]; then
+    WCSS="$THEMEDIR/outputs/waybar-colors.css"
+    get_hex() { awk -v k="$1" '$2 == k { gsub(";","",$3); print $3 }' "$WCSS"; }
+    sed \
+        -e "s|__PRIMARY__|$(get_hex primary)|g" \
+        -e "s|__ON_PRIMARY__|$(get_hex on_primary)|g" \
+        -e "s|__SECONDARY__|$(get_hex secondary)|g" \
+        -e "s|__ON_SECONDARY__|$(get_hex on_secondary)|g" \
+        -e "s|__TERTIARY__|$(get_hex tertiary)|g" \
+        -e "s|__ON_TERTIARY__|$(get_hex on_tertiary)|g" \
+        -e "s|__ON_SURFACE__|$(get_hex on_surface)|g" \
+        -e "s|__SURFACE_CONTAINER_HIGH__|$(get_hex surface_container_high)|g" \
+        -e "s|__SURFACE_CONTAINER_HIGHEST__|$(get_hex surface_container_highest)|g" \
+        "$OMP_TEMPLATE" > "$OMP_OUTPUT"
+fi
+
+# 4) symlink estable que apunta al wallpaper activo
 ln -sfn "$DEST" "$THEMEDIR/current-wallpaper"
 
 # 4) estado del tema

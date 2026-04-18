@@ -17,6 +17,7 @@ Arch con Hyprland.
   - **Mako** (notificaciones)
   - **Hyprland** (bordes de ventana, blur/vibrancy)
   - **Hyprlock** (lockscreen)
+  - **oh-my-posh** — prompt de shell tema `atomic` con segmentos shell/path/git/exec/time derivados de la paleta (brand colors de lenguajes se preservan)
 - Copia la imagen a `~/Pictures/Wallpapers/` y la aplica vía `hyprctl hyprpaper wallpaper`.
 - Mantiene estado centralizado en `~/.config/theme/current.toml` + symlink `current-wallpaper`.
 

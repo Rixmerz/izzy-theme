@@ -29,6 +29,7 @@ link "$REPO/config/waybar/config.jsonc" "$HOME/.config/waybar/config.jsonc"
 link "$REPO/config/waybar/style.css"    "$HOME/.config/waybar/style.css"
 link "$REPO/config/matugen/config.toml" "$HOME/.config/matugen/config.toml"
 link "$REPO/config/matugen/templates"   "$HOME/.config/matugen/templates"
+link "$REPO/config/theme/atomic.omp.template.json" "$HOME/.config/theme/atomic.omp.template.json"
 
 echo "==> Instalando bin/theme en ~/.local/bin"
 link "$REPO/bin/theme" "$HOME/.local/bin/theme"
@@ -73,7 +74,14 @@ Siguientes pasos:
   2) Agregá a tu ~/.config/kitty/kitty.conf (para acrílico):
        background_opacity 0.85
 
-  3) Iniciá/Reiniciá Hyprland (Super+Shift+M) y aplicá un tema:
+  3) Prompt oh-my-posh (opcional, colores derivados del wallpaper):
+       yay -S --needed oh-my-posh-bin
+       # luego agregá a tu ~/.bashrc (antes de cualquier asignación a PS1):
+       #   if command -v oh-my-posh >/dev/null && [[ -f ~/.config/theme/outputs/oh-my-posh.json ]]; then
+       #     eval "$(oh-my-posh init bash --config ~/.config/theme/outputs/oh-my-posh.json)"
+       #   fi
+
+  4) Iniciá/Reiniciá Hyprland (Super+Shift+M) y aplicá un tema:
        theme ~/Pictures/Wallpapers/<imagen>
 
 EOF
