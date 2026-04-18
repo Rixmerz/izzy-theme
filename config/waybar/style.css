@@ -1,0 +1,103 @@
+/* izzy-theme — waybar style.
+   Colores en waybar-colors.css (generado por matugen; symlink creado por install.sh).
+   Para cambiar tema: `theme <ruta-imagen>`. */
+
+@import url("waybar-colors.css");
+
+* {
+    font-family: "JetBrainsMono Nerd Font", "Noto Sans", sans-serif;
+    font-size: 12.5px;
+    font-weight: 500;
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+}
+
+window#waybar {
+    background: alpha(@surface, 0.85);
+    color: @on_surface;
+    border-radius: 10px;
+    border: 1px solid alpha(@outline, 0.5);
+}
+
+tooltip {
+    background: @surface;
+    border: 1px solid @outline;
+    border-radius: 8px;
+    color: @on_surface;
+}
+
+/* ── Workspaces ─────────────────────────────────────────────── */
+#workspaces { margin: 0 6px; padding: 0 4px; }
+
+#workspaces button {
+    color: @outline_variant;
+    background: transparent;
+    padding: 0 6px;
+    margin: 2px 1px;
+    border-radius: 6px;
+    transition: all 150ms ease;
+}
+
+#workspaces button:hover {
+    background: alpha(@primary, 0.15);
+    color: @on_surface;
+}
+
+#workspaces button.active {
+    color: @on_primary;
+    background: @primary;
+    font-weight: 700;
+}
+
+#workspaces button.urgent {
+    background: @error;
+    color: @on_error;
+}
+
+/* ── Window title ───────────────────────────────────────────── */
+#window {
+    color: @on_surface_variant;
+    padding: 0 12px;
+    font-style: italic;
+}
+
+window#waybar.empty #window { background: transparent; }
+
+/* ── Clock ──────────────────────────────────────────────────── */
+#clock {
+    color: @on_primary_container;
+    background: @primary_container;
+    padding: 0 14px;
+    margin: 4px 0;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+/* ── Right modules ──────────────────────────────────────────── */
+#cpu, #memory, #network, #pulseaudio, #battery, #tray {
+    padding: 0 10px;
+    margin: 4px 2px;
+    border-radius: 8px;
+    background: alpha(@surface_container_high, 0.6);
+}
+
+#cpu        { color: @secondary; }
+#memory     { color: @tertiary; }
+#network    { color: @primary; }
+#pulseaudio { color: @tertiary; }
+#pulseaudio.muted { color: @outline_variant; }
+
+#battery               { color: @tertiary; }
+#battery.charging      { color: @primary; }
+#battery.warning:not(.charging)  { color: @secondary; }
+#battery.critical:not(.charging) {
+    color: @error;
+    animation: blink 1s linear infinite alternate;
+}
+
+@keyframes blink { to { background-color: @error; color: @on_error; } }
+
+#tray { background: transparent; }
+#tray > .passive         { -gtk-icon-effect: dim; }
+#tray > .needs-attention { -gtk-icon-effect: highlight; }

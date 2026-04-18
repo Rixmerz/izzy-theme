@@ -1,0 +1,29 @@
+/* waybar-colors.css — generado por matugen desde la imagen actual.
+   Usamos @define-color (GTK-CSS soportado por waybar).
+   Consumidores: ~/.config/waybar/style.css via @import. */
+
+@define-color primary                   #ffb3b3;
+@define-color on_primary                #680015;
+@define-color primary_container         #ef626a;
+@define-color on_primary_container      #000000;
+
+@define-color secondary                 #ffb3b3;
+@define-color on_secondary              #541f22;
+@define-color secondary_container       #703537;
+
+@define-color tertiary                  #ffb95c;
+@define-color on_tertiary               #462a00;
+
+@define-color error                     #ffb4ab;
+@define-color on_error                  #690005;
+
+@define-color surface                   #1c1010;
+@define-color on_surface                #f4dddc;
+@define-color surface_variant           #584141;
+@define-color on_surface_variant        #dfbfbe;
+@define-color surface_container         #291c1c;
+@define-color surface_container_high    #342727;
+@define-color surface_container_highest #403131;
+
+@define-color outline                   #a68a89;
+@define-color outline_variant           #584141;

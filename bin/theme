@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# theme — aplica una imagen como wallpaper + paleta a todo el desktop.
+# Estado centralizado: ~/.config/theme/
+# Uso: theme <ruta-imagen>
+
+set -euo pipefail
+
+IMG="${1:-}"
+if [[ -z "$IMG" || ! -f "$IMG" ]]; then
+    echo "uso: theme <ruta-imagen>" >&2
+    echo "     ej:  theme ~/Downloads/foo.jpg" >&2
+    exit 1
+fi
+IMG=$(realpath "$IMG")
+
+if ! command -v matugen >/dev/null 2>&1; then
+    echo "error: matugen no está instalado." >&2
+    echo "       sudo pacman -S matugen" >&2
+    exit 2
+fi
+
+WALLDIR="$HOME/Pictures/Wallpapers"
+THEMEDIR="$HOME/.config/theme"
+mkdir -p "$WALLDIR" "$THEMEDIR/outputs"
+
+SCHEME="${THEME_SCHEME:-scheme-content}"   # scheme-content usa múltiples
+                                           # colores de la imagen para acentos,
+                                           # no solo un dominante.
+PREFER="${THEME_PREFER:-saturation}"       # cuando matugen encuentra varios
+                                           # candidatos, elige automáticamente
+                                           # el más saturado (= color más
+                                           # temáticamente distintivo).
+                                           # valores: darkness | lightness |
+                                           # saturation | less-saturation |
+                                           # value | closest-to-fallback
+
+# 1) copiar imagen al almacén canónico (idempotente)
+DEST="$WALLDIR/$(basename "$IMG")"
+cp -u "$IMG" "$DEST"
+
+# 2) matugen: genera outputs + lanza post_hooks (waybar/mako reload)
+matugen image -t "$SCHEME" --prefer "$PREFER" --mode dark "$DEST"
+
+# 3) symlink estable que apunta al wallpaper activo
+ln -sfn "$DEST" "$THEMEDIR/current-wallpaper"
+
+# 4) estado del tema
+cat > "$THEMEDIR/current.toml" <<EOF
+[theme]
+wallpaper    = "$DEST"
+source_image = "$IMG"
+applied_at   = "$(date -Iseconds)"
+mode         = "dark"
+scheme       = "$SCHEME"
+EOF
+
+# 5) wallpaper vivo vía hyprpaper IPC
+# (hyprpaper 0.8+ solo expone `wallpaper`; preload/unload fueron consolidados)
+if pgrep -x hyprpaper >/dev/null; then
+    hyprctl hyprpaper wallpaper ",$DEST" >/dev/null || true
+fi
+
+# 6) hyprland reload para tomar los nuevos colores/decoration
+if pgrep -x Hyprland >/dev/null; then
+    hyprctl reload >/dev/null
+fi
+
+notify-send -a theme "Tema aplicado" "$(basename "$DEST")" 2>/dev/null || true
+echo "✓ tema: $DEST (scheme=$SCHEME)"

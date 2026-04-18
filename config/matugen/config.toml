@@ -1,0 +1,30 @@
+# matugen — fuente de tema centralizada
+# Cada template se genera a partir de la imagen y (si corresponde) lanza un post_hook para recarga en caliente.
+
+[config]
+reload_apps = true
+
+# Opcional: matugen puede setear wallpaper pero lo hacemos nosotros desde el script
+# para tener control del IPC de hyprpaper.
+set_wallpaper = false
+
+# ─── Templates ───────────────────────────────────────────────────────────────
+
+[templates.waybar]
+input_path  = "~/.config/matugen/templates/waybar.css"
+output_path = "~/.config/theme/outputs/waybar-colors.css"
+post_hook   = "pkill -SIGUSR2 waybar || true"
+
+[templates.hyprland]
+input_path  = "~/.config/matugen/templates/hyprland.conf"
+output_path = "~/.config/theme/outputs/hyprland-colors.conf"
+# hyprctl reload lo corre el script después de todas las escrituras.
+
+[templates.hyprlock]
+input_path  = "~/.config/matugen/templates/hyprlock.conf"
+output_path = "~/.config/theme/outputs/hyprlock-colors.conf"
+
+[templates.mako]
+input_path  = "~/.config/matugen/templates/mako.conf"
+output_path = "~/.config/mako/config"
+post_hook   = "makoctl reload || true"

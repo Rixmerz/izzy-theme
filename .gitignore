@@ -1,0 +1,15 @@
+# Archivos de runtime / estado local (no versionar)
+*.bak
+*.bak-*
+*~
+*.swp
+
+# Backups que genera install.sh si se corre sobre configs preexistentes
+/izzy-theme-backup-*/
+
+# Tests / ejecutables temporales
+/tmp/
+/.venv/
+
+# Screenshots personales en carpetas anidadas
+docs/screenshots/personal-*
