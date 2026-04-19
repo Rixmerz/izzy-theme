@@ -20,6 +20,7 @@ Arch con Hyprland.
   - **oh-my-posh** — prompt de shell tema `atomic` con segmentos shell/path/git/exec/time derivados de la paleta (brand colors de lenguajes se preservan)
 - Copia la imagen a `~/Pictures/Wallpapers/` y la aplica vía `hyprctl hyprpaper wallpaper`.
 - Mantiene estado centralizado en `~/.config/theme/current.toml` + symlink `current-wallpaper`.
+- **Persistencia entre reinicios**: `hyprpaper.conf` carga `$HOME/.config/theme/current-wallpaper` (el symlink que `bin/theme` mantiene al aplicar cada tema), así que el último wallpaper aplicado se restaura automáticamente al arrancar Hyprland.
 
 Todo idempotente: podés re-correrlo sobre la misma imagen sin duplicar nada.
 
@@ -65,6 +66,34 @@ Reiniciá Hyprland (`Super+Shift+M`) y aplicá tu primer tema:
 ```sh
 theme ~/Pictures/Wallpapers/algo.jpg
 ```
+
+### Auto-launch de Hyprland al arrancar (opcional)
+
+Si entrás a un `tty` sin display manager, podés auto-lanzar Hyprland agregando a `~/.bash_profile`:
+
+```bash
+if [[ -z "$WAYLAND_DISPLAY" && -z "$DISPLAY" \
+      && "$XDG_VTNR" == "1" && "$SHLVL" == "1" ]] \
+   && command -v start-hyprland >/dev/null 2>&1; then
+    _hypr_last="/tmp/hyprland-last-start-$UID"
+    _now=$(date +%s)
+    if [[ -f "$_hypr_last" ]] && (( _now - $(cat "$_hypr_last" 2>/dev/null || echo 0) < 10 )); then
+        echo "[bash_profile] Hyprland salió hace <10s; abortando auto-launch."
+        unset _hypr_last _now
+    else
+        echo "$_now" > "$_hypr_last"
+        unset _hypr_last _now
+        exec start-hyprland
+    fi
+fi
+```
+
+Guards:
+- `SHLVL==1` + `XDG_VTNR==1` — solo en el shell de login de la tty física, no sub-shells ni otras ttys.
+- Rate-limit en `/tmp/hyprland-last-start-$UID` — si el compositor murió hace <10s (crash al arrancar), deja caer a bash en vez de entrar en loop.
+- `command -v start-hyprland` — si el binario se fue, no intenta exec.
+
+Para recuperar: esperar 10s o `rm /tmp/hyprland-last-start-$UID`.
 
 ---
 
