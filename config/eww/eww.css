@@ -1,0 +1,378 @@
+/* ═══════════════════════════════════════════════════════════════════════
+ * izzy-theme · dashboard v4 — layout 3 columnas verticales
+ * ═══════════════════════════════════════════════════════════════════════
+ * Ventana 1200×620.  3 columnas: left (260px) | net (flex) | bt (flex).
+ * Cada columna llega al fondo via `vexpand true`.  Los paneles NET/BT
+ * reciben ~500px de altura efectiva → scroll dentro recibe ~460px →
+ * contenido de 8+ wifis (>280px) scrollea correctamente.
+ *
+ * Reusa paleta matugen via symlink:
+ *   ~/.config/eww/_colors.css -> ~/.config/theme/outputs/waybar-colors.css
+ */
+@import url("_colors.css");
+
+* {
+    all: unset;
+    font-family: "Noto Sans", "Noto Sans CJK", sans-serif;
+    font-size: 12px;
+}
+
+/* ════ Shell ═════════════════════════════════════════════════════════ */
+
+.dashboard {
+    padding: 14px;
+    background-color: alpha(@surface, 0.95);
+    border: 1px solid alpha(@outline_variant, 0.55);
+    border-radius: 16px;
+    color: @on_surface;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.main-grid {
+    min-height: 560px;
+}
+
+/* ════ LEFT COLUMN (260px) ═══════════════════════════════════════════ */
+
+.left-col {
+    min-width: 260px;
+}
+
+/* ── Clock compact ── */
+.clock-box {
+    background-color: alpha(@surface_container_high, 0.65);
+    border: 1px solid alpha(@primary, 0.22);
+    border-radius: 12px;
+    padding: 10px 14px 12px;
+}
+.clock-tag {
+    color: alpha(@on_surface, 0.40);
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+}
+.clock-hm {
+    color: @primary;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 38px;
+    font-weight: 400;
+    letter-spacing: -1px;
+}
+.clock-sec {
+    color: alpha(@on_surface, 0.40);
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 15px;
+    margin-top: 14px;
+    margin-left: 3px;
+}
+.clock-date {
+    color: @tertiary;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    margin-top: 2px;
+}
+
+/* ── Sys chips (stack vertical) ── */
+.sys-chip {
+    background-color: alpha(@surface_container_high, 0.55);
+    border: 1px solid alpha(@outline_variant, 0.35);
+    border-radius: 10px;
+    padding: 8px 12px 10px;
+}
+.sys-glyph { font-size: 14px; font-weight: 700; }
+.sys-glyph-primary   { color: @primary;   }
+.sys-glyph-secondary { color: @secondary; }
+.sys-glyph-tertiary  { color: @tertiary;  }
+.sys-glyph-error     { color: @error;     }
+
+.sys-title {
+    color: alpha(@on_surface, 0.60);
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+}
+.sys-value {
+    color: @on_surface;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 12px;
+    font-weight: 600;
+}
+.sys-bar trough {
+    min-height: 3px;
+    background-color: alpha(@on_surface, 0.10);
+    border-radius: 2px;
+    margin-top: 4px;
+}
+.sys-bar highlight {
+    border-radius: 2px;
+    min-height: 3px;
+}
+.sys-bar-primary   highlight { background-color: @primary;   }
+.sys-bar-secondary highlight { background-color: @secondary; }
+.sys-bar-tertiary  highlight { background-color: @tertiary;  }
+.sys-bar-error     highlight { background-color: @error;     }
+
+/* ── Battery chip dentro del clock ── */
+.batt-chip {
+    color: alpha(@on_surface, 0.75);
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    background-color: alpha(@surface_container_highest, 0.6);
+    border-radius: 8px;
+    padding: 2px 8px;
+}
+.batt-charging {
+    color: @on_secondary_container;
+    background-color: alpha(@secondary_container, 0.7);
+}
+.batt-low {
+    color: @on_error;
+    background-color: alpha(@error, 0.75);
+}
+
+/* ── Controls (audio + brillo en un solo card) ── */
+.controls-box {
+    background-color: alpha(@secondary_container, 0.22);
+    border: 1px solid alpha(@secondary, 0.28);
+    border-radius: 10px;
+    padding: 8px 12px 10px;
+}
+.controls-tag {
+    color: @secondary;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+}
+.ctrl-btn {
+    font-size: 14px;
+    padding: 2px 8px;
+    color: @on_surface;
+    background-color: alpha(@surface_container_highest, 0.5);
+    border: 1px solid alpha(@outline_variant, 0.3);
+    border-radius: 8px;
+    min-width: 22px;
+}
+.ctrl-btn:hover {
+    background-color: @secondary_container;
+    color: @on_secondary_container;
+}
+.ctrl-glyph {
+    font-size: 14px;
+    color: @primary;
+    min-width: 22px;
+    padding: 2px 0;
+}
+.ctrl-scale trough {
+    min-height: 4px;
+    background-color: alpha(@on_surface, 0.10);
+    border-radius: 2px;
+}
+.ctrl-scale highlight {
+    border-radius: 2px;
+    min-height: 4px;
+}
+.ctrl-scale-audio  highlight { background-color: @secondary; }
+.ctrl-scale-bright highlight { background-color: @primary;   }
+.ctrl-scale slider {
+    min-width: 12px;
+    min-height: 12px;
+    margin: -4px;
+    border-radius: 50%;
+    border: 2px solid @surface;
+}
+.ctrl-scale-audio  slider { background-color: @secondary; }
+.ctrl-scale-bright slider { background-color: @primary;   }
+.ctrl-pct {
+    color: @on_surface;
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 11px;
+    font-weight: 600;
+    min-width: 40px;
+}
+
+/* ── Power actions (fila 5 botones) ── */
+.power-row {
+    margin-top: 2px;
+}
+.pow-btn {
+    font-size: 13px;
+    padding: 6px 4px;
+    color: @on_surface;
+    background-color: alpha(@surface_container_high, 0.60);
+    border: 1px solid alpha(@outline_variant, 0.35);
+    border-radius: 9px;
+    transition: background-color 140ms ease, color 140ms ease;
+}
+.pow-btn:hover {
+    background-color: @surface_container_highest;
+}
+.pow-lock:hover    { background-color: @primary_container;   color: @on_primary_container;   }
+.pow-suspend:hover { background-color: @secondary_container; color: @on_secondary_container; }
+.pow-logout:hover  { background-color: @tertiary_container;  color: @on_tertiary_container;  }
+.pow-reboot:hover  { background-color: alpha(@error, 0.4);   color: @on_surface;             }
+.pow-off:hover     { background-color: @error;               color: @on_error;               }
+
+/* ════ PANELS (NET / BT) ═════════════════════════════════════════════ */
+
+.panel {
+    background-color: alpha(@surface_container, 0.75);
+    border: 1px solid alpha(@outline_variant, 0.40);
+    border-radius: 14px;
+    padding: 12px 14px;
+}
+.panel-net {
+    background-color: alpha(@primary_container, 0.22);
+    border-color: alpha(@primary, 0.30);
+}
+.panel-bt {
+    background-color: alpha(@tertiary_container, 0.22);
+    border-color: alpha(@tertiary, 0.30);
+}
+
+/* ── Panel head ── */
+.panel-head {
+    padding-bottom: 10px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid alpha(@outline_variant, 0.40);
+}
+.panel-eyebrow {
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+}
+.panel-eyebrow-net { color: @primary;  }
+.panel-eyebrow-bt  { color: @tertiary; }
+.panel-title {
+    color: @on_surface;
+    font-family: "Noto Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+.panel-count {
+    color: alpha(@on_surface, 0.55);
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 11px;
+    font-weight: 700;
+    background-color: alpha(@surface_container_highest, 0.70);
+    padding: 2px 10px;
+    border-radius: 10px;
+    min-width: 28px;
+}
+.panel-btn {
+    color: alpha(@on_surface, 0.80);
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 14px;
+    background-color: alpha(@surface_container_highest, 0.50);
+    border: 1px solid alpha(@outline_variant, 0.30);
+    border-radius: 8px;
+    padding: 2px 10px;
+    transition: color 140ms ease, background-color 140ms ease, border-color 140ms ease;
+}
+.panel-net .panel-btn:hover {
+    color: @on_primary;  background-color: @primary;  border-color: @primary;
+}
+.panel-bt .panel-btn:hover {
+    color: @on_tertiary; background-color: @tertiary; border-color: @tertiary;
+}
+
+/* ── Listas: scroll fills, viewport transparent ── */
+.panel scrolledwindow viewport { background-color: transparent; }
+
+.listrow {
+    background-color: transparent;
+    border-radius: 8px;
+    border-left: 3px solid transparent;
+    padding: 6px 10px;
+    color: @on_surface;
+    transition: background-color 140ms ease, border-color 140ms ease;
+}
+.listrow:hover { background-color: alpha(@on_surface, 0.06); }
+.net-row:hover { border-left-color: alpha(@primary, 0.55); }
+.bt-row:hover  { border-left-color: alpha(@tertiary, 0.55); }
+.net-row.listrow-active {
+    background-color: alpha(@primary_container, 0.55);
+    border-left-color: @primary;
+}
+.bt-row.listrow-active {
+    background-color: alpha(@tertiary_container, 0.55);
+    border-left-color: @tertiary;
+}
+
+.status-dot {
+    font-size: 10px;
+    min-width: 12px;
+    color: alpha(@on_surface, 0.35);
+}
+.net-row.listrow-active .status-dot { color: @primary;  }
+.bt-row.listrow-active  .status-dot { color: @tertiary; }
+
+.sig-bars {
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 12px;
+    color: alpha(@on_surface, 0.55);
+    min-width: 48px;
+    letter-spacing: -1px;
+}
+.net-row.listrow-active .sig-bars { color: @primary; }
+
+.listrow-name {
+    color: @on_surface;
+    font-family: "Noto Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+}
+.listrow-active .listrow-name { font-weight: 700; }
+
+.listrow-meta {
+    color: alpha(@on_surface, 0.50);
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+.listrow-val {
+    color: alpha(@on_surface, 0.70);
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 11px;
+    font-weight: 600;
+    min-width: 40px;
+}
+.net-row.listrow-active .listrow-val,
+.bt-row.listrow-active  .listrow-meta { color: @on_surface; font-weight: 700; }
+
+/* ════ SCROLLBAR (siempre visible, ancho) ═══════════════════════════ */
+
+scrollbar {
+    background-color: alpha(@on_surface, 0.05);
+    border-radius: 5px;
+    min-width: 10px;
+    margin: 2px 0 2px 4px;
+}
+scrollbar slider {
+    background-color: alpha(@on_surface, 0.40);
+    border-radius: 4px;
+    min-width: 8px;
+    min-height: 30px;
+    margin: 1px;
+}
+scrollbar slider:hover { background-color: @primary; }
+scrollbar trough { background-color: transparent; border-radius: 5px; }
+
+/* ════ HINT ══════════════════════════════════════════════════════════ */
+
+.hint {
+    color: alpha(@on_surface, 0.40);
+    font-family: "JetBrainsMono Nerd Font", monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    margin-top: 2px;
+}

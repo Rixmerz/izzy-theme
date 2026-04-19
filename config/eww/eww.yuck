@@ -1,7 +1,13 @@
-;; izzy-theme dashboard — centro de mando
-;; Invocado con SUPER+I (ver hyprland.conf).  Es un layer-shell de Hyprland
-;; (eww en Wayland no tiene otra opción); `layerrule = animation slide top`
-;; le da la entrada desde arriba que haría un workspace.
+;; ═══════════════════════════════════════════════════════════════════════
+;; izzy-theme · dashboard v4 — layout 3 columnas verticales
+;; ═══════════════════════════════════════════════════════════════════════
+;; Ventana 1200×620 con 3 columnas paralelas.  Cada columna llega al
+;; fondo (vexpand true).  Los paneles NET/BT reciben ~470px para scroll.
+;;
+;; Fix clave: contenido total ≤ ventana.  GTK + layer-shell clippea en
+;; el borde de ventana; si scroll no cabe, scroll nunca ve overflow.
+;; Con 3 columnas paralelas el scroll hereda toda la altura disponible
+;; del panel (sin sumar filas) y la matemática encaja.
 
 ;;; ─── Polls ─────────────────────────────────────────────────────────────
 (defpoll cpuPct     :interval "2s"   :initial "0"       "~/.config/eww/scripts/sys.sh cpu")
@@ -20,135 +26,206 @@
 
 (defpoll volPct     :interval "1s"   :initial "0"       "~/.config/eww/scripts/audio.sh vol")
 (defpoll volMute    :interval "1s"   :initial "false"   "~/.config/eww/scripts/audio.sh mute")
-(defpoll audioSink  :interval "4s"   :initial "—"       "~/.config/eww/scripts/audio.sh sink")
+
+(defpoll brightPct  :interval "2s"   :initial "50"      "~/.config/eww/scripts/brightness.sh pct")
+
+(defpoll battPct    :interval "30s"  :initial "0"       "~/.config/eww/scripts/battery.sh pct")
+(defpoll battState  :interval "10s"  :initial "unknown" "~/.config/eww/scripts/battery.sh state")
 
 (defpoll clockHM    :interval "30s"  :initial "--:--"   "date +'%H:%M'")
 (defpoll clockSec   :interval "1s"   :initial "00"      "date +'%S'")
-(defpoll clockDate  :interval "300s" :initial "—"       "LC_TIME=es_ES.UTF-8 date +'%A %d %B'")
+(defpoll clockDate  :interval "300s" :initial "—"       "LC_TIME=es_ES.UTF-8 date +'%a · %d %b'")
 
-;;; ─── Widgets atómicos ──────────────────────────────────────────────────
+;;; ─── LEFT COLUMN: clock + sys chips + audio slim ──────────────────────
 
-(defwidget clock []
-  (box :class "clock-box" :orientation "v" :space-evenly false :hexpand false
-    (box :orientation "h" :space-evenly false
+(defwidget clockCompact []
+  (box :class "clock-box" :orientation "v" :space-evenly false :spacing 2
+    (box :orientation "h" :space-evenly false :spacing 6
+      (label :class "clock-tag" :text "LOCAL" :hexpand true :xalign 0)
+      (label :class {battState == "charging" ? "batt-chip batt-charging"
+                    : battState == "full"    ? "batt-chip batt-charging"
+                    : battPct <= 20           ? "batt-chip batt-low"
+                    :                           "batt-chip"}
+             :text {battState == "charging" ? "󰂄 ${battPct}%"
+                    : battState == "full"    ? "󰂄 ${battPct}%"
+                    :                           "${battPct}%"}))
+    (box :orientation "h" :space-evenly false :valign "baseline"
       (label :class "clock-hm"  :text clockHM)
       (label :class "clock-sec" :text ":${clockSec}"))
     (label :class "clock-date" :text clockDate :xalign 0)))
 
-(defwidget stat [title value percent]
-  (box :class "stat" :orientation "v" :spacing 6 :hexpand true
-    (box :orientation "h" :space-evenly false
-      (label :class "stat-label" :text title :hexpand true :xalign 0)
-      (label :class "stat-value" :text value))
-    (scale :class "stat-bar" :value percent :min 0 :max 100 :active false)))
+(defwidget sysChip [glyph title value percent tone]
+  (box :class "sys-chip sys-chip-${tone}" :orientation "v" :space-evenly false :spacing 4
+    (box :orientation "h" :space-evenly false :spacing 8 :valign "center"
+      (label :class "sys-glyph sys-glyph-${tone}" :text glyph)
+      (label :class "sys-title" :text title :hexpand true :xalign 0)
+      (label :class "sys-value" :text value))
+    (scale :class "sys-bar sys-bar-${tone}"
+           :value percent :min 0 :max 100 :active false)))
 
-(defwidget sysPanel []
-  (box :class "panel" :orientation "v" :spacing 12 :hexpand true
-    (label :class "panel-title" :text "Sistema" :xalign 0)
-    (stat :title "CPU"       :value "${cpuPct}%"  :percent cpuPct)
-    (stat :title "RAM"       :value memStr        :percent memPct)
-    (stat :title "Disco (/)" :value "${diskPct}%" :percent diskPct)
-    (box :class "chips" :orientation "h" :spacing 8 :space-evenly true
-      (label :class "chip" :text "CPU ${cpuTemp}°C")
-      (label :class "chip" :text "GPU ${gpuTemp}°C"))))
+(defwidget controlsBox []
+  (box :class "controls-box" :orientation "v" :space-evenly false :spacing 6
+    (label :class "controls-tag" :text "AUDIO · BRILLO" :xalign 0)
+    ;; audio
+    (box :orientation "h" :space-evenly false :spacing 8 :valign "center"
+      (button :class "ctrl-btn"
+              :onclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+              :tooltip "Click: mute/unmute"
+        (label :text {volMute == "true" ? "󰝟"
+                      : volPct >= 66 ? "󰕾"
+                      : volPct >= 33 ? "󰖀"
+                      :                "󰕿"}))
+      (scale :class "ctrl-scale ctrl-scale-audio" :hexpand true
+             :value volPct :min 0 :max 100
+             :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%")
+      (label :class "ctrl-pct" :text "${volPct}%"))
+    ;; brillo
+    (box :orientation "h" :space-evenly false :spacing 8 :valign "center"
+      (label :class "ctrl-glyph" :text "󰃠")
+      (scale :class "ctrl-scale ctrl-scale-bright" :hexpand true
+             :value brightPct :min 5 :max 100
+             :onchange "~/.config/eww/scripts/brightness.sh set {} &")
+      (label :class "ctrl-pct" :text "${brightPct}%"))))
 
-;;; ─── Red ───────────────────────────────────────────────────────────────
+(defwidget powerRow []
+  (box :class "power-row" :orientation "h" :space-evenly true :spacing 6
+    (button :class "pow-btn pow-lock"   :tooltip "Bloquear (hyprlock)"
+            :onclick "~/.config/eww/scripts/power.sh lock &"
+      (label :text "󰌾"))
+    (button :class "pow-btn pow-suspend" :tooltip "Suspender"
+            :onclick "~/.config/eww/scripts/power.sh suspend &"
+      (label :text "󰤄"))
+    (button :class "pow-btn pow-logout" :tooltip "Cerrar sesión"
+            :onclick "~/.config/eww/scripts/power.sh logout &"
+      (label :text "󰍃"))
+    (button :class "pow-btn pow-reboot" :tooltip "Reiniciar"
+            :onclick "~/.config/eww/scripts/power.sh reboot &"
+      (label :text "󰜉"))
+    (button :class "pow-btn pow-off"    :tooltip "Apagar"
+            :onclick "~/.config/eww/scripts/power.sh poweroff &"
+      (label :text "󰐥"))))
+
+(defwidget leftColumn []
+  (box :class "left-col" :orientation "v" :space-evenly false :spacing 8
+       :hexpand false :vexpand true
+    (clockCompact)
+    (sysChip :glyph "◉" :title "CPU"  :value "${cpuPct}%"             :percent cpuPct  :tone "primary")
+    (sysChip :glyph "▣" :title "RAM"  :value memStr                    :percent memPct  :tone "secondary")
+    (sysChip :glyph "◆" :title "DISK" :value "${diskPct}%"             :percent diskPct :tone "tertiary")
+    (sysChip :glyph "◭" :title "TEMP" :value "${cpuTemp}° · ${gpuTemp}°" :percent cpuTemp :tone "error")
+    (controlsBox)
+    (powerRow)))
+
+;;; ─── NET / BT panels ─────────────────────────────────────────────────
+
+(defwidget sigBars [signal]
+  (label :class "sig-bars"
+         :text {signal >= 75 ? "▂▄▆█"
+                : signal >= 50 ? "▂▄▆ "
+                : signal >= 25 ? "▂▄   "
+                :                "▂     "}))
 
 (defwidget wifiRow [ssid signal secure active]
-  (button :class {active == "yes" ? "netrow netrow-active" : "netrow"}
-          :onclick "~/.config/eww/scripts/net.sh connect '${ssid}' &"
+  (button :class {active == "yes" ? "listrow listrow-active net-row" : "listrow net-row"}
+          :onclick      "~/.config/eww/scripts/net.sh connect '${ssid}' &"
+          :onrightclick "~/.config/eww/scripts/net.sh menu    '${ssid}' &"
+          :tooltip      "Click: conectar   ·   Click derecho: más opciones"
     (box :orientation "h" :space-evenly false :spacing 10
-      (label :class "netrow-icon"
-             :text {signal >= 75 ? "󰤨" : signal >= 50 ? "󰤥" : signal >= 25 ? "󰤢" : "󰤟"})
-      (label :class "netrow-ssid" :text ssid :hexpand true :xalign 0)
-      (label :class "netrow-lock" :text {secure == "yes" ? "" : ""})
-      (label :class "netrow-sig"  :text "${signal}%"))))
+      (label :class "status-dot" :text {active == "yes" ? "●" : "○"})
+      (sigBars :signal signal)
+      (label :class "listrow-name" :text ssid :hexpand true :xalign 0 :limit-width 22)
+      (label :class "listrow-meta" :text {secure == "yes" ? "󰌾" : "  "})
+      (label :class "listrow-val"  :text "${signal}%"))))
 
 (defwidget netPanel []
-  (box :class "panel" :orientation "v" :spacing 10 :hexpand true
-    (box :orientation "h" :space-evenly false
-      (label :class "panel-title" :text "Red" :hexpand true :xalign 0)
-      (button :class "btn-mini"
+  (box :class "panel panel-net" :orientation "v" :space-evenly false :spacing 8
+       :hexpand true :vexpand true
+    (box :class "panel-head" :orientation "h" :space-evenly false :spacing 8
+      (box :orientation "v" :space-evenly false :hexpand true
+        (label :class "panel-eyebrow panel-eyebrow-net" :text "02 · RED" :xalign 0)
+        (label :class "panel-title"
+               :text {wifiInfo.ssid != "" ? wifiInfo.ssid : "sin conexión"}
+               :xalign 0 :limit-width 26))
+      (label :class "panel-count" :text "${arraylength(wifiList)}")
+      (button :class "panel-btn" :tooltip "Reescanear"
+              :onclick "~/.config/eww/scripts/net.sh rescan &"
+        (label :text "󰑓"))
+      (button :class "panel-btn" :tooltip "Toggle WiFi"
               :onclick "~/.config/eww/scripts/net.sh toggle &"
-              :tooltip "Toggle WiFi"
-        (label :text {wifiInfo.enabled == "enabled" ? "" : ""})))
-    (label :class "net-current"
-           :text {wifiInfo.ssid != "" ? wifiInfo.ssid : "desconectado"}
-           :xalign 0)
-    (scroll :vscroll true :hscroll false :height 260
-      (box :orientation "v" :spacing 4
+        (label :text {wifiInfo.enabled == "enabled" ? "󰖩" : "󰖪"})))
+    (scroll :class "panel-scroll" :vscroll true :hscroll false
+            :vexpand true :hexpand true
+      (box :orientation "v" :space-evenly false :spacing 2 :vexpand false
         (for net in wifiList
           (wifiRow :ssid {net.ssid}
                    :signal {net.signal}
                    :secure {net.secure}
                    :active {net.active}))))))
 
-;;; ─── Bluetooth ─────────────────────────────────────────────────────────
-
 (defwidget btRow [name mac connected paired]
-  (button :class {connected == "yes" ? "netrow netrow-active" : "netrow"}
-          :onclick {connected == "yes"
-                    ? "~/.config/eww/scripts/bt.sh disconnect ${mac} &"
-                    : "~/.config/eww/scripts/bt.sh connect ${mac} &"}
+  (button :class {connected == "yes" ? "listrow listrow-active bt-row" : "listrow bt-row"}
+          :onclick      {connected == "yes"
+                         ? "~/.config/eww/scripts/bt.sh disconnect ${mac} &"
+                         : (paired == "yes"
+                            ? "~/.config/eww/scripts/bt.sh connect ${mac} &"
+                            : "~/.config/eww/scripts/bt.sh pair    ${mac} &")}
+          :onrightclick "~/.config/eww/scripts/bt.sh menu ${mac} &"
+          :tooltip      "Click: conectar/pair   ·   Click derecho: más opciones"
     (box :orientation "h" :space-evenly false :spacing 10
-      (label :class "netrow-icon"
-             :text {connected == "yes" ? "󰂱" : paired == "yes" ? "󰂯" : ""})
-      (label :class "netrow-ssid" :text name :hexpand true :xalign 0))))
+      (label :class "status-dot"
+             :text {connected == "yes" ? "●" : paired == "yes" ? "◉" : "○"})
+      (label :class "listrow-name" :text name :hexpand true :xalign 0 :limit-width 26)
+      (label :class "listrow-meta"
+             :text {connected == "yes" ? "CONECTADO"
+                    : paired == "yes" ? "paired"
+                    : "disponible"}))))
 
 (defwidget btPanel []
-  (box :class "panel" :orientation "v" :spacing 10 :hexpand true
-    (box :orientation "h" :space-evenly false
-      (label :class "panel-title" :text "Bluetooth" :hexpand true :xalign 0)
-      (button :class "btn-mini"
+  (box :class "panel panel-bt" :orientation "v" :space-evenly false :spacing 8
+       :hexpand true :vexpand true
+    (box :class "panel-head" :orientation "h" :space-evenly false :spacing 8
+      (box :orientation "v" :space-evenly false :hexpand true
+        (label :class "panel-eyebrow panel-eyebrow-bt" :text "03 · BLUETOOTH" :xalign 0)
+        (label :class "panel-title"
+               :text {btPower == "on" ? "encendido" : "apagado"}
+               :xalign 0))
+      (label :class "panel-count" :text "${arraylength(btList)}")
+      (button :class "panel-btn" :tooltip "Escanear 8s"
+              :onclick "~/.config/eww/scripts/bt.sh scan &"
+        (label :text "󰍉"))
+      (button :class "panel-btn" :tooltip "Toggle Bluetooth"
               :onclick "~/.config/eww/scripts/bt.sh toggle &"
-              :tooltip "Toggle Bluetooth"
-        (label :text {btPower == "on" ? "" : ""})))
-    (scroll :vscroll true :hscroll false :height 220
-      (box :orientation "v" :spacing 4
+        (label :text {btPower == "on" ? "󰂯" : "󰂲"})))
+    (scroll :class "panel-scroll" :vscroll true :hscroll false
+            :vexpand true :hexpand true
+      (box :orientation "v" :space-evenly false :spacing 2 :vexpand false
         (for dev in btList
           (btRow :name {dev.name}
                  :mac {dev.mac}
                  :connected {dev.connected}
                  :paired {dev.paired}))))))
 
-;;; ─── Audio ─────────────────────────────────────────────────────────────
-
-(defwidget audioPanel []
-  (box :class "panel" :orientation "v" :spacing 8
-    (label :class "panel-title" :text "Audio" :xalign 0)
-    (box :orientation "h" :space-evenly false :spacing 10
-      (button :class "btn-mini"
-              :onclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-        (label :text {volMute == "true" ? ""
-                      : volPct >= 66 ? ""
-                      : volPct >= 33 ? "" : ""}))
-      (scale :class "vol-scale" :hexpand true
-             :value volPct :min 0 :max 100
-             :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%")
-      (label :class "vol-pct" :text "${volPct}%"))
-    (label :class "audio-sink" :text audioSink :xalign 0 :limit-width 48 :truncate true)))
-
-;;; ─── Layout raíz ───────────────────────────────────────────────────────
+;;; ─── Layout raíz (3 columnas paralelas) ──────────────────────────────
 
 (defwidget dashboard []
-  (box :class "dashboard" :orientation "v" :spacing 16
-    (box :orientation "h" :spacing 16 :space-evenly false
-      (clock)
-      (sysPanel))
-    (box :orientation "h" :spacing 16 :space-evenly true
+  (box :class "dashboard" :orientation "v" :space-evenly false :spacing 10
+    (box :class "main-grid" :orientation "h" :space-evenly false :spacing 12
+         :hexpand true :vexpand true
+      (leftColumn)
       (netPanel)
       (btPanel))
-    (audioPanel)))
+    (label :class "hint" :xalign 0.5
+           :text "click: conectar   ·   click derecho: opciones   ·   scroll en las listas")))
 
-;;; ─── Window ────────────────────────────────────────────────────────────
+;;; ─── Window ───────────────────────────────────────────────────────────
 
 (defwindow dashboard
   :monitor 0
   :namespace "dashboard"
   :geometry (geometry :x "0" :y "0"
-                      :width "720px" :height "820px"
+                      :width "1200px" :height "620px"
                       :anchor "top center")
   :stacking "overlay"
-  :exclusive "ignore"
+  :exclusive false
   :focusable true
   (dashboard))

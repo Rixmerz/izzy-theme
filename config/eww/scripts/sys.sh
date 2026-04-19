@@ -2,7 +2,7 @@
 # sys.sh — CPU%, RAM%, disco% para el dashboard eww
 # Entradas cortas pensadas para `defpoll` (string plano, no JSON).
 
-set -euo pipefail
+set -eu
 
 case "${1:-}" in
     cpu)

@@ -92,7 +92,30 @@ if command -v izzy-folders >/dev/null 2>&1; then
     izzy-folders >/dev/null 2>&1 || true
 fi
 
-# 6) hyprland reload para tomar los nuevos colores/decoration
+# 6) Hard-restart de waybar (SIGUSR2 solo relee JSON, NO el CSS — gotcha
+#    documentado en CLAUDE.md).  Sin restart los colores del @import no
+#    se refrescan.
+if pgrep -x waybar >/dev/null; then
+    pkill waybar 2>/dev/null || true
+    setsid -f waybar >/dev/null 2>&1 || (setsid waybar >/dev/null 2>&1 &)
+fi
+
+# 7) eww — `reload` NO re-lee `@import url()` (GTK cachea el CSS parseado
+#    y el path del symlink `_colors.css` no cambia aunque su contenido sí).
+#    Hack: hard-restart del daemon.  Si la ventana estaba abierta, la
+#    reabrimos automáticamente para que el cambio sea transparente.
+if command -v eww >/dev/null 2>&1 && pgrep -x eww >/dev/null; then
+    was_open=$(eww active-windows 2>/dev/null | grep -c dashboard || true)
+    eww kill >/dev/null 2>&1 || true
+    setsid -f eww daemon >/dev/null 2>&1 || (setsid eww daemon >/dev/null 2>&1 &)
+    # pequeño sleep para que el daemon levante el IPC socket
+    sleep 0.25
+    if [[ "$was_open" == "1" ]]; then
+        eww open dashboard >/dev/null 2>&1 || true
+    fi
+fi
+
+# 8) hyprland reload para tomar los nuevos colores/decoration
 if pgrep -x Hyprland >/dev/null; then
     hyprctl reload >/dev/null
 fi

@@ -4,7 +4,7 @@
 #   mute  → "true" | "false"
 #   sink  → descripción del sink default
 
-set -euo pipefail
+set -eu
 
 case "${1:-}" in
     vol)

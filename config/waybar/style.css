@@ -98,7 +98,7 @@ window#waybar.empty #window { background: transparent; }
 #bluetooth:hover,
 #pulseaudio:hover {
     background: alpha(@primary, 0.25);
-    color: #ffffff;
+    color: @on_primary_container;
 }
 
 #network.disconnected,

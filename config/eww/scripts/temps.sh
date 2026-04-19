@@ -2,7 +2,7 @@
 # temps.sh — temperaturas CPU / GPU en °C (entero).
 # Adaptado a Ryzen (k10temp) + NVIDIA dGPU con AMD iGPU como fallback.
 
-set -euo pipefail
+set -eu
 
 case "${1:-}" in
     cpu)
