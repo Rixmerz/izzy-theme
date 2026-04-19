@@ -42,6 +42,8 @@ link "$REPO/config/gtk-4.0/settings.ini" "$HOME/.config/gtk-4.0/settings.ini"
 echo "==> Instalando bin/theme en ~/.local/bin"
 link "$REPO/bin/theme"         "$HOME/.local/bin/theme"
 link "$REPO/bin/izzy-folders"  "$HOME/.local/bin/izzy-folders"
+link "$REPO/bin/izzy-fetch"    "$HOME/.local/bin/izzy-fetch"
+link "$REPO/config/fastfetch/config.jsonc" "$HOME/.config/fastfetch/config.jsonc"
 
 echo "==> Creando ~/.config/theme y ~/Pictures/Wallpapers"
 mkdir -p "$HOME/.config/theme/outputs" "$HOME/Pictures/Wallpapers"
@@ -55,6 +57,14 @@ done
 
 echo "==> Creando symlink waybar-colors.css dentro de ~/.config/waybar"
 ln -sfn "$HOME/.config/theme/outputs/waybar-colors.css" "$HOME/.config/waybar/waybar-colors.css"
+
+echo "==> Eww dashboard (SUPER+I)"
+link "$REPO/config/eww/eww.yuck" "$HOME/.config/eww/eww.yuck"
+link "$REPO/config/eww/eww.scss" "$HOME/.config/eww/eww.scss"
+link "$REPO/config/eww/scripts"  "$HOME/.config/eww/scripts"
+# eww.scss @importa `_colors` → reusa la paleta matugen de waybar sin duplicar templates.
+ln -sfn "$HOME/.config/theme/outputs/waybar-colors.css" \
+        "$HOME/.config/eww/_colors.css"
 
 echo "==> Symlink inicial del wallpaper default"
 if [[ ! -e "$HOME/.config/theme/current-wallpaper" ]]; then
@@ -78,7 +88,10 @@ Siguientes pasos:
        sudo pacman -S --needed matugen hyprland hyprpaper hyprlock hypridle \
            waybar mako brightnessctl playerctl grim slurp wl-clipboard \
            cliphist wofi kitty thunar ttf-jetbrains-mono-nerd noto-fonts \
-           noto-fonts-emoji noto-fonts-cjk papirus-icon-theme
+           noto-fonts-emoji noto-fonts-cjk papirus-icon-theme lm_sensors \
+           bluez-utils networkmanager pipewire wireplumber
+       yay -S --needed eww                    # dashboard (layer-shell GTK)
+       sudo sensors-detect --auto             # habilita k10temp / amdgpu
 
   2) Agregá a tu ~/.config/kitty/kitty.conf (para acrílico):
        background_opacity 0.85

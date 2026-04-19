@@ -196,3 +196,203 @@ ThunarWindow menu menuitem:hover,
     background-color: @primary_container;
     color: @on_primary_container;
 }
+
+/* ══════════════════════════════════════════════════════════════════
+ * APPS GTK GENÉRICAS — pavucontrol, blueman-manager, nm-connection-editor,
+ * file-chooser dialogs, about/preferences.
+ * Se aplica sólo a widgets NO marcados por un selector más específico.
+ * ══════════════════════════════════════════════════════════════════ */
+
+/* Background + color base para toda ventana GTK */
+.pavucontrol,
+window.pavucontrol,
+window.blueman-manager,
+.blueman-manager,
+.nm-connection-editor,
+window.nm-connection-editor,
+dialog,
+window.dialog,
+GtkFileChooserDialog,
+filechooser,
+.background {
+    background-color: @surface;
+    color: @on_surface;
+}
+
+/* Headerbars y titlebars genéricas */
+.pavucontrol headerbar,
+window.blueman-manager headerbar,
+.nm-connection-editor headerbar,
+dialog headerbar,
+filechooser headerbar,
+headerbar.titlebar {
+    background: alpha(@surface_container, 0.90);
+    color: @on_surface;
+    border-bottom: 1px solid alpha(@outline_variant, 0.35);
+    padding: 6px 8px;
+}
+
+/* Sidebars / listas en estas apps */
+.pavucontrol list,
+.pavucontrol list row,
+window.blueman-manager treeview,
+window.blueman-manager list,
+.nm-connection-editor treeview,
+filechooser list,
+filechooser treeview {
+    background-color: alpha(@surface_container, 0.45);
+    color: @on_surface;
+}
+
+.pavucontrol list row:selected,
+.blueman-manager treeview:selected,
+.blueman-manager list row:selected,
+.nm-connection-editor treeview:selected,
+filechooser list row:selected,
+dialog treeview:selected {
+    background-color: alpha(@primary_container, 0.75);
+    color: @on_primary_container;
+    border-radius: 6px;
+}
+
+/* Botones genéricos en apps flotantes */
+.pavucontrol button,
+window.blueman-manager button,
+.nm-connection-editor button,
+dialog button,
+filechooser button {
+    background-color: alpha(@surface_container_high, 0.55);
+    color: @on_surface;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 10px;
+    transition: background-color 160ms ease;
+}
+
+.pavucontrol button:hover,
+window.blueman-manager button:hover,
+.nm-connection-editor button:hover,
+dialog button:hover,
+filechooser button:hover {
+    background-color: alpha(@primary_container, 0.60);
+    color: @on_primary_container;
+}
+
+.pavucontrol button.suggested-action,
+dialog button.suggested-action,
+filechooser button.suggested-action {
+    background-color: @primary;
+    color: @on_primary;
+    font-weight: 600;
+}
+
+/* Entries/inputs genéricos */
+.pavucontrol entry,
+window.blueman-manager entry,
+.nm-connection-editor entry,
+dialog entry,
+filechooser entry {
+    background-color: alpha(@surface_container_highest, 0.75);
+    color: @on_surface;
+    border: 1px solid alpha(@outline_variant, 0.4);
+    border-radius: 8px;
+    padding: 4px 10px;
+}
+
+.pavucontrol entry:focus,
+.nm-connection-editor entry:focus,
+dialog entry:focus,
+filechooser entry:focus {
+    border-color: @primary;
+    background-color: alpha(@surface_container_highest, 0.90);
+}
+
+/* Sliders (volumen en pavucontrol, etc.) */
+.pavucontrol scale trough {
+    background: alpha(@surface_container_high, 0.55);
+    border-radius: 999px;
+    min-height: 6px;
+}
+
+.pavucontrol scale highlight {
+    background: @primary;
+    border-radius: 999px;
+}
+
+.pavucontrol scale slider {
+    background: @on_primary_container;
+    border: 2px solid @primary;
+    border-radius: 999px;
+    min-width: 14px;
+    min-height: 14px;
+    box-shadow: 0 1px 3px alpha(#000000, 0.35);
+}
+
+/* Progressbars */
+.pavucontrol progressbar trough,
+progressbar trough {
+    background: alpha(@surface_container_high, 0.55);
+    border-radius: 999px;
+}
+
+.pavucontrol progressbar progress,
+progressbar progress {
+    background: @primary;
+    border-radius: 999px;
+}
+
+/* Switches / checkboxes genéricos */
+switch {
+    background: alpha(@surface_container_highest, 0.7);
+    border-radius: 999px;
+}
+
+switch:checked {
+    background: @primary;
+}
+
+switch slider {
+    background: @on_surface;
+    border-radius: 999px;
+}
+
+/* Menús contextuales genéricos */
+popover,
+popover.menu,
+menu {
+    background-color: alpha(@surface_container_high, 0.96);
+    border: 1px solid alpha(@outline_variant, 0.5);
+    border-radius: 10px;
+    padding: 4px;
+}
+
+popover menuitem,
+menu menuitem {
+    color: @on_surface;
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+
+popover menuitem:hover,
+menu menuitem:hover {
+    background-color: @primary_container;
+    color: @on_primary_container;
+}
+
+/* Scrollbars genéricos — iguales a los de Thunar */
+scrollbar {
+    background: transparent;
+    border: none;
+}
+
+scrollbar slider {
+    background: alpha(@outline, 0.55);
+    border-radius: 6px;
+    min-width: 6px;
+    min-height: 6px;
+    border: 2px solid transparent;
+}
+
+scrollbar slider:hover {
+    background: @primary;
+}

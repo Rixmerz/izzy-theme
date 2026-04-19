@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+# izzy-fetch — logo de Arch + componentes del equipo, coloreado con la paleta
+# matugen activa.  Si `fastfetch` está instalado, delega en él (mejor perf,
+# más info); si no, usa este fallback puro bash.
+
+if command -v fastfetch >/dev/null 2>&1; then
+    cfg="$HOME/.config/fastfetch/config.jsonc"
+    if [[ -f "$cfg" ]]; then
+        exec fastfetch --config "$cfg"
+    fi
+    exec fastfetch
+fi
+
+set -u
+
+# ─── Color primary desde matugen (fallback azul claro si no hay tema) ────
+wcss="$HOME/.config/theme/outputs/waybar-colors.css"
+if [[ -f "$wcss" ]]; then
+    HEX=$(awk '$2=="primary" {gsub(";",""); print $3}' "$wcss" | head -1)
+fi
+HEX=${HEX:-#89b4fa}
+hex=${HEX#\#}
+R24=$((16#${hex:0:2})); G24=$((16#${hex:2:2})); B24=$((16#${hex:4:2}))
+C=$(printf "\033[38;2;%d;%d;%dm" "$R24" "$G24" "$B24")
+BOLD=$'\033[1m'; DIM=$'\033[2m'; RESET=$'\033[0m'
+
+# ─── Info del sistema ─────────────────────────────────────────────────────
+user=${USER:-$(id -un)}
+host=$(uname -n)
+os=$(awk -F= '/^PRETTY_NAME/ {gsub(/"/,""); print $2}' /etc/os-release)
+kernel=$(uname -r)
+uptime=$(uptime -p 2>/dev/null | sed 's/^up //')
+pkgs=$(pacman -Qq 2>/dev/null | wc -l)
+aur=$(pacman -Qqm 2>/dev/null | wc -l)
+shell_v="bash ${BASH_VERSION%%(*}"
+wm=${XDG_CURRENT_DESKTOP:-${DESKTOP_SESSION:-?}}
+[[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] && wm="Hyprland"
+term=$(ps -o comm= -p "${PPID:-$$}" 2>/dev/null | head -1)
+[[ "$term" == "login" || -z "$term" ]] && term=${TERM:-?}
+cpu=$(awk -F: '/model name/ {gsub(/ +/," ",$2); sub(/^ /,"",$2); print $2; exit}' /proc/cpuinfo | sed 's/ CPU @.*//;s/ Processor//')
+cores=$(nproc 2>/dev/null)
+[[ -n "$cores" ]] && cpu="$cpu (${cores}T)"
+gpu=$(lspci 2>/dev/null | awk -F': ' '/VGA|3D controller|Display controller/ {print $2; exit}' \
+      | sed 's/ (rev .*//;s/Corporation //;s/ Controller//;s/Advanced Micro Devices, Inc\. //;s/\[AMD\/ATI\] //')
+mem=$(free --mebi | awk '/^Mem:/ {printf "%.1f / %.1f GiB (%.0f%%)", $3/1024, $2/1024, $3*100/$2}')
+swap=$(free --mebi | awk '/^Swap:/ && $2>0 {printf "%.1f / %.1f GiB", $3/1024, $2/1024}')
+disk=$(df -h --output=used,size,pcent / | tail -1 | awk '{printf "%s / %s (%s)", $1, $2, $3}')
+if command -v hyprctl >/dev/null 2>&1; then
+    resolution=$(hyprctl -j monitors 2>/dev/null | python3 -c '
+import json, sys
+try:
+    mons = json.load(sys.stdin)
+    parts = []
+    for m in mons:
+        parts.append("%dx%d@%.0fHz" % (m["width"], m["height"], m["refreshRate"]))
+    print(", ".join(parts))
+except Exception:
+    pass' 2>/dev/null)
+fi
+[[ -z "${resolution:-}" ]] && resolution=$(xrandr 2>/dev/null | awk '/\*/ {print $1; exit}')
+battery=""
+if [[ -d /sys/class/power_supply/BAT0 ]]; then
+    cap=$(< /sys/class/power_supply/BAT0/capacity)
+    st=$(< /sys/class/power_supply/BAT0/status)
+    battery="${cap}% (${st})"
+fi
+model=""
+[[ -r /sys/devices/virtual/dmi/id/product_name ]] && model=$(< /sys/devices/virtual/dmi/id/product_name)
+
+# ─── Logo Arch ────────────────────────────────────────────────────────────
+logo=(
+"${C}                   -\`${RESET}"
+"${C}                  .o+\`${RESET}"
+"${C}                 \`ooo/${RESET}"
+"${C}                \`+oooo:${RESET}"
+"${C}               \`+oooooo:${RESET}"
+"${C}               -+oooooo+:${RESET}"
+"${C}             \`/:-:++oooo+:${RESET}"
+"${C}            \`/++++/+++++++:${RESET}"
+"${C}           \`/++++++++++++++:${RESET}"
+"${C}          \`/+++${BOLD}ooooooooooooo${RESET}${C}/\`${RESET}"
+"${C}         ${DIM}./${RESET}${C}ooosssso++osssssso+\`${RESET}"
+"${C}        ${DIM}.oossssso-\`\`\`\`/ossssss+\`${RESET}"
+"${C}       ${DIM}-osssssso.${RESET}${C}      :ssssssso.${RESET}"
+"${C}      ${DIM}:osssssss/${RESET}${C}        osssso+++.${RESET}"
+"${C}     ${DIM}/ossssssss/${RESET}${C}        +ssssooo/-${RESET}"
+"${C}   ${DIM}\`/ossssso+/:-${RESET}${C}        -:/+osssso+-${RESET}"
+"${C}  ${DIM}\`+sso+:-\`${RESET}${C}                 \`.-/+oso:${RESET}"
+"${C} ${DIM}\`++:.${RESET}${C}                           \`-/+/${RESET}"
+"${C} ${DIM}.\`${RESET}${C}                                 \`/${RESET}"
+)
+
+# ─── Info formateada ──────────────────────────────────────────────────────
+label() { printf "${BOLD}${C}%-11s${RESET}" "$1"; }
+info=(
+"${BOLD}${C}${user}${RESET}@${BOLD}${C}${host}${RESET}"
+"${DIM}──────────────────────────────${RESET}"
+"$(label OS)      ${os}"
+"$(label Host)    ${model:-?}"
+"$(label Kernel)  ${kernel}"
+"$(label Uptime)  ${uptime}"
+"$(label Packages) ${pkgs} (pacman)$( [[ $aur -gt 0 ]] && echo ", ${aur} (AUR)")"
+"$(label Shell)   ${shell_v}"
+"$(label WM)      ${wm}"
+"$(label Terminal) ${term}"
+"$(label Display) ${resolution:-?}"
+"$(label CPU)     ${cpu}"
+"$(label GPU)     ${gpu:-?}"
+"$(label Memory)  ${mem}"
+)
+[[ -n "$swap" ]] && info+=("$(label Swap)    ${swap}")
+info+=("$(label Disk)    ${disk}")
+[[ -n "$battery" ]] && info+=("$(label Battery) ${battery}")
+# Paleta decorativa al final
+palette="$(printf "\033[48;2;${R24};${G24};${B24}m   \033[0m")"
+info+=(
+""
+"${BOLD}${C}●${RESET} ${BOLD}Paleta matugen${RESET}  ${palette}"
+)
+
+# ─── Render lado a lado ───────────────────────────────────────────────────
+max=${#logo[@]}; (( ${#info[@]} > max )) && max=${#info[@]}
+echo
+for ((i=0; i<max; i++)); do
+    printf "  %b" "${logo[i]:-}"
+    printf "   %b\n" "${info[i]:-}"
+done
+echo

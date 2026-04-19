@@ -21,6 +21,7 @@ Arch con Hyprland.
 - Copia la imagen a `~/Pictures/Wallpapers/` y la aplica vía `hyprctl hyprpaper wallpaper`.
 - Mantiene estado centralizado en `~/.config/theme/current.toml` + symlink `current-wallpaper`.
 - **Persistencia entre reinicios**: `hyprpaper.conf` carga `$HOME/.config/theme/current-wallpaper` (el symlink que `bin/theme` mantiene al aplicar cada tema), así que el último wallpaper aplicado se restaura automáticamente al arrancar Hyprland.
+- **Dashboard** con CPU/RAM/temps, WiFi (lista + connect), Bluetooth (lista + toggle) y volumen; keybind `SUPER+I`, baja desde arriba con animación Hyprland nativa.  Reusa la paleta matugen sin duplicar templates (`_colors.css` es symlink a `waybar-colors.css`).
 
 Todo idempotente: podés re-correrlo sobre la misma imagen sin duplicar nada.
 
@@ -37,7 +38,15 @@ sudo pacman -S --needed \
     brightnessctl playerctl grim slurp wl-clipboard cliphist \
     wofi kitty thunar \
     ttf-jetbrains-mono-nerd noto-fonts noto-fonts-emoji noto-fonts-cjk \
-    papirus-icon-theme
+    papirus-icon-theme lm_sensors \
+    bluez-utils networkmanager pipewire wireplumber
+```
+
+Para el dashboard (eww es AUR):
+
+```sh
+yay -S --needed eww
+sudo sensors-detect --auto    # habilita k10temp / amdgpu para lecturas de CPU/GPU temp
 ```
 
 ---
@@ -168,6 +177,7 @@ colores. Cada app los lee via `source =` (hyprland/hyprlock), `@import`
 | `Super+Shift + 1..9` | mover ventana al workspace N |
 | `Print` / `Shift+Print` / `Super+Print` / `Super+Shift+Print` | captura |
 | `Super+;` | cliphist (historial portapapeles) |
+| `Super+I` | dashboard eww (CPU/RAM/temps, WiFi, Bluetooth, volumen) |
 
 ---
 

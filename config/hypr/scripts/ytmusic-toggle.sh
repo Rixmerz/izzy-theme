@@ -9,7 +9,7 @@ WORKSPACE="ytmusic"
 
 # Check by window class (más robusto que pgrep con binarios de nombre largo)
 if hyprctl clients -j | grep -q "\"class\": \"$APP_CLASS\""; then
-    hyprctl dispatch togglespecialworkspace "$WORKSPACE" >/dev/null
+    exec "$(dirname "$0")/scratchpad-switch.sh" "$WORKSPACE"
 else
     setsid "$APP_BIN" >/dev/null 2>&1 < /dev/null &
     disown
