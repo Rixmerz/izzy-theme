@@ -12,9 +12,14 @@ link() {
     local src="$1" dst="$2"
     mkdir -p "$(dirname "$dst")"
     if [[ -e "$dst" && ! -L "$dst" ]]; then
-        mkdir -p "$BACKUP"
-        mv "$dst" "$BACKUP/"
-        echo "  backup:  $dst -> $BACKUP/"
+        # Preservar la jerarquía dentro del backup para evitar colisiones
+        # entre paths con el mismo basename (ej: hypr/scripts vs waybar/scripts).
+        local rel="${dst#$HOME/.config/}"
+        rel="${rel#$HOME/.local/}"
+        local bk_dst="$BACKUP/$rel"
+        mkdir -p "$(dirname "$bk_dst")"
+        mv "$dst" "$bk_dst"
+        echo "  backup:  $dst -> $bk_dst"
     fi
     ln -sfn "$src" "$dst"
     echo "  link:    $dst -> $src"
@@ -62,9 +67,9 @@ ln -sfn "$HOME/.config/theme/outputs/waybar-colors.css" "$HOME/.config/waybar/wa
 
 echo "==> Eww dashboard (SUPER+I)"
 link "$REPO/config/eww/eww.yuck" "$HOME/.config/eww/eww.yuck"
-link "$REPO/config/eww/eww.scss" "$HOME/.config/eww/eww.scss"
+link "$REPO/config/eww/eww.css"  "$HOME/.config/eww/eww.css"
 link "$REPO/config/eww/scripts"  "$HOME/.config/eww/scripts"
-# eww.scss @importa `_colors` → reusa la paleta matugen de waybar sin duplicar templates.
+# eww.css @importa `_colors.css` → reusa la paleta matugen de waybar sin duplicar templates.
 ln -sfn "$HOME/.config/theme/outputs/waybar-colors.css" \
         "$HOME/.config/eww/_colors.css"
 
@@ -73,6 +78,44 @@ if [[ ! -e "$HOME/.config/theme/current-wallpaper" ]]; then
     if [[ -f /usr/share/hypr/wall0.png ]]; then
         ln -sfn /usr/share/hypr/wall0.png "$HOME/.config/theme/current-wallpaper"
     fi
+fi
+
+# Plymouth boot splash — assets viven fuera de $HOME, requieren sudo + regen
+# del initramfs.  Idempotente: si los archivos en /usr/share ya coinciden
+# con los del repo, no toca nada y no regenera.  Skip si plymouth no está.
+echo "==> Plymouth boot splash (tema 'izzy', requiere sudo)"
+if command -v plymouthd >/dev/null 2>&1 && [[ -d /usr/share/plymouth/themes ]]; then
+    PLY_SRC="$REPO/themes/plymouth/izzy"
+    PLY_DST="/usr/share/plymouth/themes/izzy"
+    PLY_CHANGED=0
+    sudo install -d -m 755 "$PLY_DST"
+    for f in izzy.plymouth izzy.script logo.png; do
+        if ! sudo cmp -s "$PLY_SRC/$f" "$PLY_DST/$f" 2>/dev/null; then
+            sudo install -m 644 "$PLY_SRC/$f" "$PLY_DST/$f"
+            echo "  copy:    $PLY_DST/$f"
+            PLY_CHANGED=1
+        fi
+    done
+    # Setear como default si aún no lo está.  No usamos `plymouth-set-default-theme -R`
+    # porque queremos controlar nosotros cuándo se regenera el initramfs.
+    if [[ "$(plymouth-set-default-theme 2>/dev/null || true)" != "izzy" ]]; then
+        sudo plymouth-set-default-theme izzy
+        echo "  theme:   default = izzy"
+        PLY_CHANGED=1
+    fi
+    if (( PLY_CHANGED )); then
+        echo "  initrd:  regenerando (sudo mkinitcpio -P)…"
+        sudo mkinitcpio -P >/dev/null 2>&1
+        echo "  initrd:  ✓ logo embebido en /boot/initramfs-linux.img"
+    else
+        echo "  ✓ tema y default ya sincronizados, sin cambios"
+    fi
+else
+    echo "  skip: plymouth no instalado.  Para activarlo:"
+    echo "        sudo pacman -S plymouth"
+    echo "        agregá 'plymouth' al HOOKS de /etc/mkinitcpio.conf antes de 'autodetect'"
+    echo "        agregá 'quiet splash' al cmdline de tu bootloader"
+    echo "        re-corré install.sh"
 fi
 
 if [[ -d "$BACKUP" ]]; then

@@ -1,29 +1,162 @@
-/* gtk.css — GTK4/libadwaita overrides con paleta matugen.
-   Para apps GTK4 futuras (nautilus, file-roller, etc.) */
+/* gtk.css — GTK4 / libadwaita overrides con paleta matugen.
+   libadwaita hardcodea colores clave pero respeta los @define-color
+   oficiales (window_bg_color, accent_*, card_*, etc.) si se redefinen
+   ANTES de que la app pida el token.  Redefinimos todos los tokens
+   estándar apuntando a nuestra paleta matugen + reglas de widget. */
 
 @import url("file:///home/rixmerz/.config/theme/outputs/waybar-colors.css");
 
-/* Accent global */
-@define-color accent_bg_color  @primary;
-@define-color accent_fg_color  @on_primary;
-@define-color accent_color     @primary;
+/* ── Tokens oficiales de libadwaita ─────────────────────────
+ * Nombres fijos que libadwaita lee internamente — esto es lo único
+ * que realmente cambia el look-and-feel de apps GTK4 modernas.
+ * ═══════════════════════════════════════════════════════════ */
 
-/* Window background más sutil cuando el compositor ya aplica opacity */
-window {
+@define-color accent_bg_color          @primary;
+@define-color accent_fg_color          @on_primary;
+@define-color accent_color             @primary;
+
+@define-color destructive_bg_color     @error;
+@define-color destructive_fg_color     @on_error;
+@define-color destructive_color        @error;
+
+@define-color success_bg_color         @tertiary;
+@define-color success_fg_color         @on_tertiary;
+@define-color success_color            @tertiary;
+
+@define-color warning_bg_color         @tertiary;
+@define-color warning_fg_color         @on_tertiary;
+@define-color warning_color            @tertiary;
+
+@define-color error_bg_color           @error;
+@define-color error_fg_color           @on_error;
+@define-color error_color              @error;
+
+@define-color window_bg_color          @surface;
+@define-color window_fg_color          @on_surface;
+
+@define-color view_bg_color            @surface;
+@define-color view_fg_color            @on_surface;
+
+@define-color headerbar_bg_color       @surface_container;
+@define-color headerbar_fg_color       @on_surface;
+@define-color headerbar_border_color   @outline_variant;
+@define-color headerbar_backdrop_color @surface;
+@define-color headerbar_shade_color    alpha(@outline_variant, 0.35);
+
+@define-color sidebar_bg_color         @surface_container_high;
+@define-color sidebar_fg_color         @on_surface_variant;
+@define-color sidebar_backdrop_color   @surface_container;
+@define-color sidebar_shade_color      alpha(@outline_variant, 0.35);
+
+@define-color secondary_sidebar_bg_color      @surface_container;
+@define-color secondary_sidebar_fg_color      @on_surface_variant;
+@define-color secondary_sidebar_backdrop_color @surface;
+@define-color secondary_sidebar_shade_color   alpha(@outline_variant, 0.35);
+
+@define-color card_bg_color            @surface_container_high;
+@define-color card_fg_color            @on_surface;
+@define-color card_shade_color         alpha(@outline_variant, 0.35);
+
+@define-color dialog_bg_color          @surface;
+@define-color dialog_fg_color          @on_surface;
+
+@define-color popover_bg_color         @surface_container_high;
+@define-color popover_fg_color         @on_surface;
+
+@define-color thumbnail_bg_color       @surface_container;
+@define-color thumbnail_fg_color       @on_surface;
+
+@define-color shade_color              alpha(#000000, 0.25);
+@define-color scrollbar_outline_color  @outline;
+
+/* ── Reglas extra por widget (encima de los tokens) ─────── */
+
+window,
+.background,
+dialog,
+.osd {
     background-color: @surface;
     color: @on_surface;
 }
 
-headerbar {
-    background-color: alpha(@surface_container, 0.85);
+headerbar,
+.titlebar {
+    background-color: alpha(@surface_container, 0.92);
     color: @on_surface;
     border-bottom: 1px solid alpha(@outline_variant, 0.35);
 }
 
-button {
+button,
+.linked > button {
     border-radius: 8px;
 }
 
-entry {
+button.suggested-action {
+    background-color: @primary;
+    color: @on_primary;
+}
+
+button.destructive-action {
+    background-color: @error;
+    color: @on_error;
+}
+
+entry,
+spinbutton,
+searchentry {
     border-radius: 8px;
+    background-color: alpha(@surface_container_highest, 0.70);
+    color: @on_surface;
+    caret-color: @primary;
+}
+
+entry:focus,
+spinbutton:focus,
+searchentry:focus {
+    border-color: @primary;
+}
+
+row:selected,
+list row:selected,
+listview > row:selected,
+columnview row:selected,
+gridview child:selected {
+    background-color: @primary_container;
+    color: @on_primary_container;
+    border-radius: 6px;
+}
+
+popover,
+popover.menu,
+popover > contents {
+    background-color: alpha(@surface_container_high, 0.96);
+    color: @on_surface;
+    border: 1px solid alpha(@outline_variant, 0.5);
+    border-radius: 10px;
+}
+
+tooltip {
+    background-color: alpha(@surface_container_highest, 0.96);
+    color: @on_surface;
+    border: 1px solid alpha(@outline_variant, 0.5);
+    border-radius: 8px;
+}
+
+scrollbar slider {
+    background-color: alpha(@outline, 0.55);
+    border-radius: 6px;
+    min-width: 6px;
+    min-height: 6px;
+}
+
+scrollbar slider:hover {
+    background-color: @primary;
+}
+
+switch:checked {
+    background-color: @primary;
+}
+
+progressbar > trough > progress {
+    background-color: @primary;
 }
