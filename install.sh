@@ -24,7 +24,9 @@ echo "==> Linkeando configs"
 link "$REPO/config/hypr/hyprland.conf"  "$HOME/.config/hypr/hyprland.conf"
 link "$REPO/config/hypr/hyprlock.conf"  "$HOME/.config/hypr/hyprlock.conf"
 link "$REPO/config/hypr/hypridle.conf"  "$HOME/.config/hypr/hypridle.conf"
-link "$REPO/config/hypr/hyprpaper.conf" "$HOME/.config/hypr/hyprpaper.conf"
+# hyprpaper.conf NO se symlinkea: bin/theme lo regenera en cada run con la
+# ruta absoluta del wallpaper activo (workaround del lookup miss preload/
+# wallpaper con symlinks en hyprpaper 0.8.3 — ver CLAUDE.md > hyprpaper).
 link "$REPO/config/waybar/config.jsonc" "$HOME/.config/waybar/config.jsonc"
 link "$REPO/config/waybar/style.css"    "$HOME/.config/waybar/style.css"
 link "$REPO/config/waybar/scripts"      "$HOME/.config/waybar/scripts"

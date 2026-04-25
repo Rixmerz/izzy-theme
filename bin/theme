@@ -71,6 +71,21 @@ fi
 # 4) symlink estable que apunta al wallpaper activo
 ln -sfn "$DEST" "$THEMEDIR/current-wallpaper"
 
+# 4b) regenerar hyprpaper.conf con la ruta absoluta resuelta del wallpaper.
+# Workaround hyprpaper 0.8.3: preload guarda real-path pero busca wallpaper
+# por string literal. El symlink causa lookup miss al boot (renderiza negro
+# hasta que se respawnea). Escribir el path real evita el miss.
+HYPRPAPER_CONF="$HOME/.config/hypr/hyprpaper.conf"
+cat > "$HYPRPAPER_CONF" <<EOF
+# AUTO-GENERADO por bin/theme — NO editar a mano.
+# Path absoluto resuelto (no symlink) para evitar lookup miss preload/wallpaper
+# con hyprpaper 0.8.3.  Regenerado en cada \`theme <img>\`.
+preload  = $DEST
+wallpaper = ,$DEST
+splash   = false
+ipc      = on
+EOF
+
 # 4) estado del tema
 cat > "$THEMEDIR/current.toml" <<EOF
 [theme]
@@ -81,10 +96,17 @@ mode         = "dark"
 scheme       = "$SCHEME"
 EOF
 
-# 5) wallpaper vivo vía hyprpaper IPC
-# (hyprpaper 0.8+ solo expone `wallpaper`; preload/unload fueron consolidados)
+# 5) wallpaper vivo vía hyprpaper IPC, con fallback a restart.
+# hyprpaper 0.8.3 + hyprland 0.54.3 tienen IPC incompatible
+# ("hyprpaper protocol version too low") — el IPC siempre falla en silencio.
+# Si falla, matar y relanzar hyprpaper: re-lee hyprpaper.conf que apunta al
+# symlink current-wallpaper, así carga el wallpaper nuevo.
 if pgrep -x hyprpaper >/dev/null; then
-    hyprctl hyprpaper wallpaper ",$DEST" >/dev/null || true
+    if ! hyprctl hyprpaper wallpaper ",$DEST" >/dev/null 2>&1; then
+        pkill -x hyprpaper 2>/dev/null || true
+        sleep 0.3
+        setsid -f hyprpaper >/dev/null 2>&1 || (setsid hyprpaper >/dev/null 2>&1 &)
+    fi
 fi
 
 # 5b) regenerar Papirus-Izzy con color de carpeta derivado del primary
