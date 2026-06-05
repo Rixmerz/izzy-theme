@@ -9,7 +9,7 @@
   "margin-right": 8,
 
   "modules-left":   ["hyprland/workspaces", "hyprland/window"],
-  "modules-center": ["custom/mediaplayer", "clock"],
+  "modules-center": ["custom/mediaplayer", "custom/cava", "clock"],
   "modules-right":  ["network", "bluetooth", "pulseaudio", "battery", "tray"],
 
   "hyprland/workspaces": {
@@ -63,6 +63,13 @@
     "on-click-right":  "playerctl next",
     "on-scroll-up":    "playerctl volume 0.05+",
     "on-scroll-down":  "playerctl volume 0.05-"
+  },
+
+  "custom/cava": {
+    "exec": "~/.config/waybar/scripts/cava.sh",
+    "format": "{}",
+    "tooltip": false,
+    "on-click": "playerctl play-pause"
   },
 
   "network": {

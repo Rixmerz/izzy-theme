@@ -83,6 +83,20 @@ window#waybar.empty #window { background: transparent; }
     font-weight: 600;
 }
 
+/* ── TACH: visualizer cava (envelope estilo 300ZX, baila con audio) ──
+ * Barras ▁▂▃▄▅▆▇█ en rosa paleta + glow tenue (dash retroiluminado).
+ * Idle = línea base mínima ▁▁▁ → discreto. */
+#custom-cava {
+    color: @primary;
+    background: transparent;
+    padding: 0 8px;
+    margin: 4px 4px;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px alpha(@primary, 0.55);
+    transition: color 200ms ease;
+}
+
 /* ── Right cluster: glyphs monocromos uniformes (utilidades) ──
  * Un solo lenguaje: todos planos, color quieter (@on_surface_variant)
  * para que recedan; el reloj rosa del centro queda como único hero.
