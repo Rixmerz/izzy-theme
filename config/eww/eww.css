@@ -17,6 +17,16 @@
     font-size: 12px;
 }
 
+/* Superficie de la ventana eww transparente → solo el widget redondeado
+   (.dashboard / .cal-box) pinta.  Sin esto el tema GTK dibuja un fondo
+   CUADRADO detrás → esquinas rectas asoman tras el borde redondeado.
+   `* { all: unset }` (espec. 0,0,0) NO gana al `window {bg}` del tema
+   (0,0,1); por eso hace falta una regla explícita de igual especificidad. */
+window,
+.background {
+    background-color: transparent;
+}
+
 /* ════ Shell ═════════════════════════════════════════════════════════ */
 
 .dashboard {

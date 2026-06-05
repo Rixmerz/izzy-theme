@@ -227,5 +227,23 @@
                       :anchor "top center")
   :stacking "overlay"
   :exclusive false
-  :focusable true
+  :focusable false
   (dashboard))
+
+;; ── Calendar popup (click en reloj waybar) ──────────────────────────
+;; focusable:false → NO secuestra teclado (lección layer-shell grab).
+;; Cierra re-clickeando el reloj (toggle).
+(defwidget calbox []
+  (box :class "cal-box" :orientation "v" :space-evenly false
+    (calendar :class "cal")))
+
+(defwindow calendar
+  :monitor 0
+  :namespace "calendar"
+  :geometry (geometry :x "0" :y "44px"
+                      :width "300px"
+                      :anchor "top center")
+  :stacking "overlay"
+  :exclusive false
+  :focusable false
+  (calbox))
