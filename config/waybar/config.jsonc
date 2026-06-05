@@ -98,8 +98,8 @@
     "format-muted":    "󰝟",
     "format-bluetooth":"{icon}",
     "format-icons": {
-      "headphones": "",
-      "default":    ["", "", ""]
+      "headphones": "󰋋",
+      "default":    ["󰕿", "󰖀", "󰕾"]
     },
     "tooltip-format":  "{desc}\n{volume}%",
     "scroll-step": 5,
@@ -110,14 +110,14 @@
   "battery": {
     "states":   { "warning": 25, "critical": 12 },
     "format":           "{icon} {capacity}%",
-    "format-charging":  "  {capacity}%",
-    "format-plugged":   "  {capacity}%",
-    "format-icons": ["", "", "", "", ""],
+    "format-charging":  "󰂄 {capacity}%",
+    "format-plugged":   "󰚥 {capacity}%",
+    "format-icons": ["󰁺", "󰁼", "󰁾", "󰂀", "󰁹"],
     "tooltip-format":   "{timeTo}  ({power}W)"
   },
 
   "tray": {
-    "icon-size": 16,
-    "spacing":   8
+    "icon-size": 14,
+    "spacing":   6
   }
 }
