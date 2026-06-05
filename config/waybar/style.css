@@ -83,43 +83,46 @@ window#waybar.empty #window { background: transparent; }
     font-weight: 600;
 }
 
-/* ── Right side: glyphs sueltos (acciones) ─────────────────── */
-#network, #bluetooth, #pulseaudio {
-    color: @on_surface;
+/* ── Right cluster: glyphs monocromos uniformes (utilidades) ──
+ * Un solo lenguaje: todos planos, color quieter (@on_surface_variant)
+ * para que recedan; el reloj rosa del centro queda como único hero.
+ * Battery ya NO es píldora — se integra al cluster (glyph + texto). */
+#network, #bluetooth, #pulseaudio, #battery {
+    color: @on_surface_variant;
     background: transparent;
-    padding: 0 8px;
     margin: 4px 2px;
     border-radius: 8px;
-    font-size: 15px;
     transition: background-color 200ms ease, color 200ms ease;
+}
+
+#network, #bluetooth, #pulseaudio {
+    padding: 0 8px;
+    font-size: 15px;
+}
+
+#battery {
+    padding: 0 10px 0 6px;
+    font-weight: 500;
 }
 
 #network:hover,
 #bluetooth:hover,
-#pulseaudio:hover {
-    background: alpha(@primary, 0.25);
-    color: @on_primary_container;
+#pulseaudio:hover,
+#battery:hover {
+    background: alpha(@primary, 0.20);
+    color: @on_surface;
 }
 
 #network.disconnected,
 #bluetooth.disabled,
 #bluetooth.off,
 #pulseaudio.muted {
-    color: alpha(@on_surface, 0.55);
+    color: alpha(@on_surface, 0.40);
 }
 
 #bluetooth.connected { color: @tertiary; }
 
-/* ── Battery: única píldora con texto (info crítica) ───────── */
-#battery {
-    color: @on_surface;
-    background: alpha(@surface_container_high, 0.65);
-    padding: 0 12px;
-    margin: 4px 4px;
-    border-radius: 999px;
-    font-weight: 500;
-}
-
+/* Battery: estados semánticos (info crítica) */
 #battery.charging { color: @primary; }
 #battery.warning:not(.charging)  { color: @secondary; }
 #battery.critical:not(.charging) {
