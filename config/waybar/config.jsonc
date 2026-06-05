@@ -43,7 +43,8 @@
     "format": "{:%a %d %b  %H:%M}",
     "format-alt": "{:%Y-%m-%d %H:%M:%S}",
     "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-    "interval": 5
+    "interval": 5,
+    "on-click": "~/.config/eww/scripts/calendar-toggle.sh"
   },
 
   "custom/mediaplayer": {
