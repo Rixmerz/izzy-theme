@@ -10,7 +10,7 @@
 
   "modules-left":   ["hyprland/workspaces", "hyprland/window"],
   "modules-center": ["custom/mediaplayer", "custom/cava", "clock"],
-  "modules-right":  ["network", "bluetooth", "pulseaudio", "battery", "tray"],
+  "modules-right":  ["custom/tasks", "network", "bluetooth", "pulseaudio", "battery", "tray"],
 
   "hyprland/workspaces": {
     "disable-scroll": false,
@@ -71,6 +71,17 @@
     "format": "{}",
     "tooltip": false,
     "on-click": "playerctl play-pause"
+  },
+
+  "custom/tasks": {
+    "exec": "/home/rixmerz/.local/bin/task waybar",
+    "return-type": "json",
+    "interval": 60,
+    "signal": 8,
+    "format": "{}",
+    "tooltip": true,
+    "on-click":       "/home/rixmerz/.local/bin/task-menu",
+    "on-click-right": "/home/rixmerz/.local/bin/task-capture"
   },
 
   "network": {
