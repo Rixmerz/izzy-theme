@@ -32,6 +32,14 @@
 (defpoll battPct    :interval "30s"  :initial "0"       "~/.config/eww/scripts/battery.sh pct")
 (defpoll battState  :interval "10s"  :initial "unknown" "~/.config/eww/scripts/battery.sh state")
 
+(defpoll awakeState :interval "2s"   :initial "off"     "~/.local/bin/idle-inhibit-toggle.sh status")
+(defpoll lidLockState :interval "2s" :initial "off"     "~/.local/bin/lid-lock-toggle.sh status")
+(defpoll kbdRgbState :interval "2s"  :initial "off"     "~/.local/bin/kbd-rgb-toggle.sh status")
+
+(defpoll mirrorState :interval "3s"  :initial "extended" "~/.config/eww/scripts/screen-mirror.sh status")
+
+(defpoll recState    :interval "1s"  :initial "off"      "~/.config/eww/scripts/record.sh status")
+
 (defpoll clockHM    :interval "30s"  :initial "--:--"   "date +'%H:%M'")
 (defpoll clockSec   :interval "1s"   :initial "00"      "date +'%S'")
 (defpoll clockDate  :interval "300s" :initial "—"       "LC_TIME=es_ES.UTF-8 date +'%a · %d %b'")
@@ -85,7 +93,87 @@
       (scale :class "ctrl-scale ctrl-scale-bright" :hexpand true
              :value brightPct :min 5 :max 100
              :onchange "~/.config/eww/scripts/brightness.sh set {} &")
-      (label :class "ctrl-pct" :text "${brightPct}%"))))
+      (label :class "ctrl-pct" :text "${brightPct}%"))
+    ;; keep-awake switch (frena hypridle: lock/dpms/suspend)
+    (button :class {awakeState == "on" ? "awake-row awake-row-on" : "awake-row awake-row-off"}
+            :tooltip "Keep awake: pausa hypridle (lock/dpms/suspend) para no cortar Claude"
+            :onclick "~/.local/bin/idle-inhibit-toggle.sh toggle &"
+      (box :orientation "h" :space-evenly false :spacing 10 :valign "center"
+        (label :class {awakeState == "on" ? "awake-glyph awake-glyph-on" : "awake-glyph"}
+               :text {awakeState == "on" ? "󰛨" : "󰾫"})
+        (box :orientation "v" :space-evenly false :hexpand true
+          (label :class "awake-title" :xalign 0 :text "Keep awake")
+          (label :class "awake-sub" :xalign 0
+                 :text {awakeState == "on" ? "claude no se duerme" : "comportamiento normal"}))
+        (box :class {awakeState == "on" ? "awake-track awake-track-on" : "awake-track awake-track-off"}
+             :orientation "h" :space-evenly false
+          (box :class {awakeState == "on" ? "awake-knob awake-knob-on" : "awake-knob awake-knob-off"}))))
+    ;; lid no-lock — bajar la pantalla no bloquea ni suspende
+    (button :class {lidLockState == "on" ? "awake-row awake-row-on" : "awake-row awake-row-off"}
+            :tooltip "Lid no-lock: bajar la tapa solo apaga el panel (no lock, no suspend)"
+            :onclick "~/.local/bin/lid-lock-toggle.sh toggle &"
+      (box :orientation "h" :space-evenly false :spacing 10 :valign "center"
+        (label :class {lidLockState == "on" ? "awake-glyph awake-glyph-on" : "awake-glyph"}
+               :text {lidLockState == "on" ? "󰍶" : "󰌾"})
+        (box :orientation "v" :space-evenly false :hexpand true
+          (label :class "awake-title" :xalign 0 :text "Lid no-lock")
+          (label :class "awake-sub" :xalign 0
+                 :text {lidLockState == "on" ? "tapa no bloquea" : "comportamiento normal"}))
+        (box :class {lidLockState == "on" ? "awake-track awake-track-on" : "awake-track awake-track-off"}
+             :orientation "h" :space-evenly false
+          (box :class {lidLockState == "on" ? "awake-knob awake-knob-on" : "awake-knob awake-knob-off"}))))
+    ;; teclado RGB — cava audio-reactivo on / luces off (ahorro batería)
+    (button :class {kbdRgbState == "on" ? "awake-row awake-row-on" : "awake-row awake-row-off"}
+            :tooltip "Teclado RGB: audio-reactivo (cava) on / apagado para ahorrar batería"
+            :onclick "~/.local/bin/kbd-rgb-toggle.sh toggle &"
+      (box :orientation "h" :space-evenly false :spacing 10 :valign "center"
+        (label :class {kbdRgbState == "on" ? "awake-glyph awake-glyph-on" : "awake-glyph"}
+               :text {kbdRgbState == "on" ? "󰌌" : "󰌍"})
+        (box :orientation "v" :space-evenly false :hexpand true
+          (label :class "awake-title" :xalign 0 :text "Teclado RGB")
+          (label :class "awake-sub" :xalign 0
+                 :text {kbdRgbState == "on" ? "audio-reactivo" : "apagado (ahorro)"}))
+        (box :class {kbdRgbState == "on" ? "awake-track awake-track-on" : "awake-track awake-track-off"}
+             :orientation "h" :space-evenly false
+          (box :class {kbdRgbState == "on" ? "awake-knob awake-knob-on" : "awake-knob awake-knob-off"}))))
+    ;; screen mirror — duplicar pantalla / bloquear duplicación
+    (box :class "mirror-row" :orientation "h" :space-evenly true :spacing 6
+      (button :class {mirrorState == "mirrored"
+                      ? "mirror-btn mirror-btn-on"
+                      : (mirrorState == "locked" ? "mirror-btn mirror-btn-disabled" : "mirror-btn")}
+              :tooltip {mirrorState == "locked"
+                        ? "Bloqueado — desbloquea para duplicar"
+                        : (mirrorState == "mirrored" ? "Click: extender (deshacer mirror)" : "Click: duplicar pantalla")}
+              :onclick "~/.config/eww/scripts/screen-mirror.sh toggle &"
+        (box :orientation "h" :space-evenly false :spacing 8 :valign "center"
+          (label :class "mirror-glyph" :text {mirrorState == "mirrored" ? "󰍹" : "󰍺"})
+          (label :class "mirror-label"
+                 :text {mirrorState == "mirrored" ? "Duplicada"
+                        : mirrorState == "locked"   ? "Bloqueado"
+                        : mirrorState == "single"   ? "Sin externo"
+                        :                             "Duplicar"})))
+      (button :class {mirrorState == "locked" ? "mirror-btn mirror-btn-on" : "mirror-btn"}
+              :tooltip {mirrorState == "locked"
+                        ? "Click: desbloquear duplicación"
+                        : "Click: bloquear duplicación (fuerza extendido)"}
+              :onclick "~/.config/eww/scripts/screen-mirror.sh togglelock &"
+        (box :orientation "h" :space-evenly false :spacing 8 :valign "center"
+          (label :class "mirror-glyph" :text {mirrorState == "locked" ? "󰌾" : "󰌿"})
+          (label :class "mirror-label" :text {mirrorState == "locked" ? "Bloqueado" : "Bloquear"}))))
+    ;; grabar pantalla — toggle wf-recorder → ~/Records
+    (button :class {recState == "on" ? "awake-row awake-row-on" : "awake-row awake-row-off"}
+            :tooltip "Grabar pantalla completa (toggle). Guarda en ~/Records"
+            :onclick "~/.config/eww/scripts/record.sh toggle &"
+      (box :orientation "h" :space-evenly false :spacing 10 :valign "center"
+        (label :class {recState == "on" ? "awake-glyph awake-glyph-on" : "awake-glyph"}
+               :text {recState == "on" ? "󰻃" : "󰕧"})
+        (box :orientation "v" :space-evenly false :hexpand true
+          (label :class "awake-title" :xalign 0 :text {recState == "on" ? "Grabando…" : "Grabar pantalla"})
+          (label :class "awake-sub" :xalign 0
+                 :text {recState == "on" ? "click para detener y guardar" : "completa · audio · ~/Records"}))
+        (box :class {recState == "on" ? "awake-track awake-track-on" : "awake-track awake-track-off"}
+             :orientation "h" :space-evenly false
+          (box :class {recState == "on" ? "awake-knob awake-knob-on" : "awake-knob awake-knob-off"}))))))
 
 (defwidget powerRow []
   (box :class "power-row" :orientation "h" :space-evenly true :spacing 6
@@ -209,6 +297,11 @@
 
 (defwidget dashboard []
   (box :class "dashboard" :orientation "v" :space-evenly false :spacing 10
+    (box :class "dashboard-header" :orientation "h" :space-evenly false :hexpand true
+      (label :class "dashboard-title" :xalign 0 :hexpand true :text "Dashboard")
+      (button :class "dashboard-close" :tooltip "Forzar cierre"
+              :onclick "~/.config/eww/scripts/force-close.sh"
+              "✕"))
     (box :class "main-grid" :orientation "h" :space-evenly false :spacing 12
          :hexpand true :vexpand true
       (leftColumn)
